@@ -1,0 +1,28 @@
+{
+  "purpose": "Synthetic direct-generation regression examples; not model training data",
+  "cases": [
+    {
+      "name": "Explicit mapping plus minimum validation",
+      "request": {
+        "direction": "REQUEST",
+        "source": {"format":"JSON","payload":{"name":"Jane","amount":25}},
+        "target": {"format":"JSON","payload":{"fullName":"","total":0}},
+        "message": "Please map name to fullName\nmap amount to total\namount must be at least 10"
+      },
+      "expected_output": {"fullName":"Jane","total":25},
+      "invalid_input": {"name":"Jane","amount":9}
+    },
+    {
+      "name": "Exclude bundle codes, preserving valid JSON separators",
+      "request": {
+        "direction":"REQUEST",
+        "source":{"format":"JSON","payload":{"items":[{"code":"A"},{"code":"B"},{"code":"C"}]}},
+        "target":{"format":"JSON","payload":{"items":[{"code":""}]}},
+        "message":"exclude items where items[0].code in [\"B\"]"
+      },
+      "expected_output":{"items":[{"code":"A"},{"code":"C"}]},
+      "all_excluded_input":{"items":[{"code":"B"}]},
+      "all_excluded_output":{"items":[]}
+    }
+  ]
+}

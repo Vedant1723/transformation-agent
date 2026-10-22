@@ -1,0 +1,27 @@
+{
+  "inference_completed": true,
+  "active_checkpoint_unchanged": true,
+  "python": "D:\\transformatio-agent\\backend\\.venv\\Scripts\\python.exe",
+  "result": {
+    "passed": true,
+    "render_passed": true,
+    "mapping_passed": true,
+    "mapping_warning": "",
+    "infrastructure_error": false,
+    "engine": "own-model-experimental",
+    "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+    "checkpoint_sha256": "91c8f4b026d4d2835f3de962e980e4b48ac3ac3562a1e2910109ce3c6c70a6bf",
+    "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"header\": headers!(body.header!{})}>\n\n<Payment>\n  <total>${body.request.amount?string?xml}</total>\n</Payment>\n",
+    "output": "\n<Payment>\n  <total>25</total>\n</Payment>\n",
+    "expected": "<Payment><total>25</total></Payment>",
+    "error": "",
+    "stage": "comparison",
+    "source": {
+      "amount": 25
+    },
+    "target_field": "total",
+    "target_format": "XML",
+    "approved": false,
+    "fallback_used": false
+  }
+}

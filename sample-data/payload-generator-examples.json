@@ -1,0 +1,10 @@
+{
+  "endpoint": "/api/v2/transformations/tools",
+  "examples": [
+    {"action":"generate_payload","direction":"REQUEST","source_format":"JSON","template":"<#assign body=JsonUtils.getJsonAsMap(input)>{\"amount\":${body.request.amount?c},\"trace\":\"${body.header.trace?json_string}\"}"},
+    {"action":"generate_payload","direction":"RESPONSE","source_format":"XML","xml_root":"payment","template":"<#assign body=xml['child::node()']>{\"amount\":${body.amount?number?c}}"},
+    {"action":"generate_payload","direction":"RESPONSE","source_format":"ISO","template":"<#assign body=JsonUtils.getJsonAsMap(input)>{\"amount\":${body[\"4\"]?number?c}}"},
+    {"action":"generate_payload","direction":"REQUEST","source_format":"JSON","template":"<#assign body=JsonUtils.getJsonAsMap(input)>{\"items\":[<#list (body.request.items)![] as item>{\"code\":\"${item.code?json_string}\"}<#sep>,</#list>]}"}
+  ],
+  "note":"Synthetic editable samples only. Use the existing test endpoint to verify execution and business rules. ISO is text field=value, not packed ISO8583."
+}

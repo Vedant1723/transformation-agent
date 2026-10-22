@@ -1,0 +1,73 @@
+{
+  "feedback_response": {
+    "status": "queued",
+    "job_id": 1,
+    "active_model_changed": false
+  },
+  "worker": {
+    "state": "processed",
+    "job": {
+      "id": 1,
+      "status": "completed",
+      "result": {
+        "artifact_directory": "feedback-job-1-33ac4c75bb70",
+        "steps": 4,
+        "promoted": false,
+        "report_sha256": "21efc7ba3a79abba8bfe16ff75506c09fa48d43494992b23228504db1ce611b9",
+        "checkpoint_sha256": "be72ff641a8a87eb9b4837abd03834230f8efef232e6f262715fb8f80252704c",
+        "evaluation_tested": 1,
+        "evaluation_render_before": 1,
+        "evaluation_render_after": 1,
+        "evaluation_before": 1,
+        "evaluation_after": 1,
+        "release_status": "requires_full_evaluation"
+      }
+    }
+  },
+  "changed_parameter_tensors": 29,
+  "active_checkpoint_unchanged": true,
+  "model_api_retraining": {
+    "enabled": true,
+    "latest_job": {
+      "id": 1,
+      "bundle_id": 1,
+      "status": "completed",
+      "settings": {
+        "steps": 4,
+        "bundle_sha256": "4d88bd9cef15e910d01071810a50e32669308878a5e162c2cbced16da55afb80"
+      },
+      "result": {
+        "artifact_directory": "feedback-job-1-33ac4c75bb70",
+        "steps": 4,
+        "promoted": false,
+        "report_sha256": "21efc7ba3a79abba8bfe16ff75506c09fa48d43494992b23228504db1ce611b9",
+        "checkpoint_sha256": "be72ff641a8a87eb9b4837abd03834230f8efef232e6f262715fb8f80252704c",
+        "evaluation_tested": 1,
+        "evaluation_render_before": 1,
+        "evaluation_render_after": 1,
+        "evaluation_before": 1,
+        "evaluation_after": 1,
+        "release_status": "requires_full_evaluation"
+      },
+      "active_model_changed": false,
+      "release_readiness": {
+        "ready_to_activate": false,
+        "comparison": "unchanged",
+        "evaluation": {
+          "tested": 1,
+          "before": 1,
+          "after": 1
+        },
+        "blockers": [
+          "Independent full retention evaluation has not been attached.",
+          "Candidate integrity and release approval have not been verified.",
+          "Activation and rollback workflow is not implemented."
+        ],
+        "scope": "Small reviewed feedback dataset only; not general transformation accuracy."
+      }
+    },
+    "activation": "not_implemented_candidates_only"
+  },
+  "database": "training-acceptance-20261013-155422.sqlite",
+  "note": "Actual optimizer updates; candidate only, not automatic activation."
+}

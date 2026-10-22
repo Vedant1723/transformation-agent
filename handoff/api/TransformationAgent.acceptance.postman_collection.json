@@ -1,0 +1,3531 @@
+{
+  "info": {
+    "name": "Transformation Agent \u2014 standalone acceptance",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Synthetic tests. Run each format folder in order. Generation and feedback persist data: use a dedicated test identity/database. Requires compatible Java. ISO means textual field=value. Direct integration headers only; use organisational authentication through the real gateway. Model status does not run inference."
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Gateway-Key",
+            "value": "{{gatewayKey}}"
+          },
+          {
+            "key": "X-Authenticated-User",
+            "value": "{{gatewayUser}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Model availability (not inference)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/transformations/model",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Gateway-Key",
+            "value": "{{gatewayKey}}"
+          },
+          {
+            "key": "X-Authenticated-User",
+            "value": "{{gatewayUser}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+              "pm.test(\"Checkpoint available\", () => pm.expect(r.data.available).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: JSON to JSON",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"JSON\", \"target_format\": \"JSON\", \"input_payload\": {\"amount\": 25}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(JSON.parse(r.data.output).total).to.eql(25));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"JSON\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"JSON\", \"target_format\": \"JSON\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: JSON to XML",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"XML\",\n    \"payload\": \"<Payment><total>0</total></Payment>\"\n  },\n  \"mappings\": {\n    \"Payment.total\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"JSON\", \"target_format\": \"XML\", \"input_payload\": {\"amount\": 25}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"<total>25</total>\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"JSON\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"JSON\", \"target_format\": \"XML\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: JSON to ISO",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=0\"\n  },\n  \"mappings\": {\n    \"4\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"JSON\", \"target_format\": \"ISO\", \"input_payload\": {\"amount\": 25}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"4=25\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"JSON\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"JSON\", \"target_format\": \"ISO\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: XML to JSON",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"XML\",\n    \"payload\": \"<payment><amount>25</amount></payment>\"\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"payment.amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"XML\", \"target_format\": \"JSON\", \"input_payload\": \"<payment><amount>25</amount></payment>\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(JSON.parse(r.data.output).total).to.eql(25));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"XML\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"XML\", \"target_format\": \"JSON\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: XML to XML",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"XML\",\n    \"payload\": \"<payment><amount>25</amount></payment>\"\n  },\n  \"target\": {\n    \"format\": \"XML\",\n    \"payload\": \"<Payment><total>0</total></Payment>\"\n  },\n  \"mappings\": {\n    \"Payment.total\": \"payment.amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"XML\", \"target_format\": \"XML\", \"input_payload\": \"<payment><amount>25</amount></payment>\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"<total>25</total>\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"XML\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"XML\", \"target_format\": \"XML\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: XML to ISO",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"XML\",\n    \"payload\": \"<payment><amount>25</amount></payment>\"\n  },\n  \"target\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=0\"\n  },\n  \"mappings\": {\n    \"4\": \"payment.amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"XML\", \"target_format\": \"ISO\", \"input_payload\": \"<payment><amount>25</amount></payment>\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"4=25\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"XML\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"XML\", \"target_format\": \"ISO\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: ISO to JSON",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=25\"\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"4\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"ISO\", \"target_format\": \"JSON\", \"input_payload\": \"4=25\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(JSON.parse(r.data.output).total).to.eql(25));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"ISO\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"ISO\", \"target_format\": \"JSON\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: ISO to XML",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=25\"\n  },\n  \"target\": {\n    \"format\": \"XML\",\n    \"payload\": \"<Payment><total>0</total></Payment>\"\n  },\n  \"mappings\": {\n    \"Payment.total\": \"4\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"ISO\", \"target_format\": \"XML\", \"input_payload\": \"4=25\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"<total>25</total>\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"ISO\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"ISO\", \"target_format\": \"XML\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "REQUEST: ISO to ISO",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=25\"\n  },\n  \"target\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=0\"\n  },\n  \"mappings\": {\n    \"4\": \"4\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"ISO\", \"target_format\": \"ISO\", \"input_payload\": \"4=25\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"4=25\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"ISO\", \"direction\": \"REQUEST\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"REQUEST\", \"source_format\": \"ISO\", \"target_format\": \"ISO\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: JSON to JSON",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"JSON\", \"target_format\": \"JSON\", \"input_payload\": {\"amount\": 25}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(JSON.parse(r.data.output).total).to.eql(25));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"JSON\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"JSON\", \"target_format\": \"JSON\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: JSON to XML",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"XML\",\n    \"payload\": \"<Payment><total>0</total></Payment>\"\n  },\n  \"mappings\": {\n    \"Payment.total\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"JSON\", \"target_format\": \"XML\", \"input_payload\": {\"amount\": 25}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"<total>25</total>\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"JSON\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"JSON\", \"target_format\": \"XML\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: JSON to ISO",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=0\"\n  },\n  \"mappings\": {\n    \"4\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"JSON\", \"target_format\": \"ISO\", \"input_payload\": {\"amount\": 25}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"4=25\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"JSON\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"JSON\", \"target_format\": \"ISO\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: XML to JSON",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"XML\",\n    \"payload\": \"<payment><amount>25</amount></payment>\"\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"payment.amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"XML\", \"target_format\": \"JSON\", \"input_payload\": \"<payment><amount>25</amount></payment>\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(JSON.parse(r.data.output).total).to.eql(25));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"XML\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"XML\", \"target_format\": \"JSON\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: XML to XML",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"XML\",\n    \"payload\": \"<payment><amount>25</amount></payment>\"\n  },\n  \"target\": {\n    \"format\": \"XML\",\n    \"payload\": \"<Payment><total>0</total></Payment>\"\n  },\n  \"mappings\": {\n    \"Payment.total\": \"payment.amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"XML\", \"target_format\": \"XML\", \"input_payload\": \"<payment><amount>25</amount></payment>\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"<total>25</total>\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"XML\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"XML\", \"target_format\": \"XML\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: XML to ISO",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"XML\",\n    \"payload\": \"<payment><amount>25</amount></payment>\"\n  },\n  \"target\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=0\"\n  },\n  \"mappings\": {\n    \"4\": \"payment.amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"XML\", \"target_format\": \"ISO\", \"input_payload\": \"<payment><amount>25</amount></payment>\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"4=25\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"XML\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"XML\", \"target_format\": \"ISO\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: ISO to JSON",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=25\"\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"4\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"ISO\", \"target_format\": \"JSON\", \"input_payload\": \"4=25\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(JSON.parse(r.data.output).total).to.eql(25));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"ISO\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"ISO\", \"target_format\": \"JSON\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: ISO to XML",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=25\"\n  },\n  \"target\": {\n    \"format\": \"XML\",\n    \"payload\": \"<Payment><total>0</total></Payment>\"\n  },\n  \"mappings\": {\n    \"Payment.total\": \"4\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"ISO\", \"target_format\": \"XML\", \"input_payload\": \"4=25\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"<total>25</total>\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"ISO\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"ISO\", \"target_format\": \"XML\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RESPONSE: ISO to ISO",
+      "item": [
+        {
+          "name": "1 Generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"RESPONSE\",\n  \"source\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=25\"\n  },\n  \"target\": {\n    \"format\": \"ISO\",\n    \"payload\": \"4=0\"\n  },\n  \"mappings\": {\n    \"4\": \"4\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"templateJSON\", JSON.stringify(r.data.template));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 Render original input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"ISO\", \"target_format\": \"ISO\", \"input_payload\": \"4=25\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));",
+                  "pm.test(\"Business value\", () => pm.expect(r.data.output).to.include(\"4=25\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 Generate dummy input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\": \"generate_payload\", \"source_format\": \"ISO\", \"direction\": \"RESPONSE\", \"xml_root\": \"payment\", \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 Render generated input",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"direction\": \"RESPONSE\", \"source_format\": \"ISO\", \"target_format\": \"ISO\", \"input_payload\": {{samplePayloadJSON}}, \"template\": {{templateJSON}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+                  "pm.test(\"Rendered successfully\", () => pm.expect(r.data.passed).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Feedback: synthetic approved correction (writes data)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/transformations/feedback",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Gateway-Key",
+            "value": "{{gatewayKey}}"
+          },
+          {
+            "key": "X-Authenticated-User",
+            "value": "{{gatewayUser}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"context\": {\n    \"direction\": \"REQUEST\",\n    \"source\": {\n      \"payload\": {\n        \"name\": \"Alice\"\n      }\n    },\n    \"target\": {\n      \"payload\": {\n        \"fullName\": \"\"\n      }\n    },\n    \"mappings\": {\n      \"fullName\": \"name\"\n    }\n  },\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"fullName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"expected_output\": \"{\\\"fullName\\\":\\\"Alice\\\"}\",\n  \"approved\": true,\n  \"sanitized\": true,\n  \"validation_cases\": [\n    {\n      \"name\": \"Second name\",\n      \"input_payload\": {\n        \"name\": \"Bob\"\n      },\n      \"expected_output\": \"{\\\"fullName\\\":\\\"Bob\\\"}\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "const r = pm.response.json();",
+              "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
+              "pm.test(\"Reviewed learning data\", () => pm.expect(r.data.dataset_eligible).to.eql(true));",
+              "pm.test(\"No automatic weight training\", () => pm.expect(r.data.active_model_learning_confirmed).to.eql(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools: inspect",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/transformations/tools",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Gateway-Key",
+            "value": "{{gatewayKey}}"
+          },
+          {
+            "key": "X-Authenticated-User",
+            "value": "{{gatewayUser}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"inspect\",\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"fullName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"other_template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"displayName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"replacements\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools: compare",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/transformations/tools",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Gateway-Key",
+            "value": "{{gatewayKey}}"
+          },
+          {
+            "key": "X-Authenticated-User",
+            "value": "{{gatewayUser}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"compare\",\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"fullName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"other_template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"displayName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"replacements\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools: revise",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/transformations/tools",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Gateway-Key",
+            "value": "{{gatewayKey}}"
+          },
+          {
+            "key": "X-Authenticated-User",
+            "value": "{{gatewayUser}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"revise\",\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"fullName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"other_template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"displayName\\\":\\\"${body.request.name?json_string}\\\"}\",\n  \"replacements\": [\n    {\n      \"find\": \"fullName\",\n      \"replace\": \"displayName\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

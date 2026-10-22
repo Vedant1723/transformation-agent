@@ -1,0 +1,10 @@
+{
+  "request_examples":[
+    {"inputRequest":{"amount":25},"headers":{"trace":"T1"},"additionalProperties":{"partner":"DEMO"}},
+    {"inputRequest":"{\"amount\":25}","headers":{"trace":"T1"},"additionalProperties":{"partner":"DEMO"}},
+    {"inputRequest":"<payment><amount>25</amount></payment>","headers":{"trace":"T1"},"additionalProperties":{"partner":"DEMO"}}
+  ],
+  "access":{"payload":"body.request.amount","headers":"body.headers.trace","additionalProperties":"body.addProps.partner"},
+  "response_example":{"amount":25},
+  "response_access":"body.amount"
+}

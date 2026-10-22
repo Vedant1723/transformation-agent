@@ -1,0 +1,1129 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Biller AI backend API",
+    "description": "Stable response envelope. Existing business workflows; no automatic model activation.",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/transformations/generate": {
+      "post": {
+        "tags": [
+          "Transformations"
+        ],
+        "summary": "Transformation Chat",
+        "operationId": "transformation_chat_transformations_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransformationChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "SERVICE_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GatewayKey": [],
+            "GatewayIdentity": []
+          }
+        ]
+      }
+    },
+    "/transformations/test": {
+      "post": {
+        "tags": [
+          "Transformations"
+        ],
+        "summary": "Test Template",
+        "description": "Return failed-test evidence as data; unavailable infrastructure stays an HTTP error.",
+        "operationId": "test_template_transformations_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransformationTestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "SERVICE_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GatewayKey": [],
+            "GatewayIdentity": []
+          }
+        ]
+      }
+    },
+    "/transformations/tools": {
+      "post": {
+        "tags": [
+          "Transformations"
+        ],
+        "summary": "Existing Template Tools",
+        "operationId": "existing_template_tools_transformations_tools_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateToolsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "SERVICE_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GatewayKey": [],
+            "GatewayIdentity": []
+          }
+        ]
+      }
+    },
+    "/transformations/model": {
+      "get": {
+        "tags": [
+          "Transformations"
+        ],
+        "summary": "Status",
+        "operationId": "status_transformations_model_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "VALIDATION_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "SERVICE_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GatewayKey": [],
+            "GatewayIdentity": []
+          }
+        ]
+      }
+    },
+    "/transformations/feedback": {
+      "post": {
+        "tags": [
+          "Transformations"
+        ],
+        "summary": "Feedback",
+        "operationId": "feedback_transformations_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Feedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "SERVICE_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GatewayKey": [],
+            "GatewayIdentity": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "VALIDATION_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "SERVICE_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CorrectionCase": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "input_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Input Payload"
+          },
+          "expected_output": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Output"
+          },
+          "expected_error": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "input_payload"
+        ],
+        "title": "CorrectionCase"
+      },
+      "Feedback": {
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/TransformationChatRequest"
+          },
+          "template": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Template"
+          },
+          "expected_output": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Expected Output"
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Comment",
+            "default": ""
+          },
+          "approved": {
+            "type": "boolean",
+            "title": "Approved",
+            "default": false
+          },
+          "sanitized": {
+            "type": "boolean",
+            "title": "Sanitized",
+            "default": false
+          },
+          "validation_cases": {
+            "items": {
+              "$ref": "#/components/schemas/CorrectionCase"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Validation Cases"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "context",
+          "template",
+          "expected_output"
+        ],
+        "title": "Feedback"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "TemplateToolsRequest": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "inspect",
+              "compare",
+              "revise",
+              "generate_payload"
+            ],
+            "title": "Action"
+          },
+          "source_format": {
+            "type": "string",
+            "enum": [
+              "JSON",
+              "XML",
+              "ISO"
+            ],
+            "title": "Source Format",
+            "default": "JSON"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "REQUEST",
+              "RESPONSE"
+            ],
+            "title": "Direction",
+            "default": "REQUEST"
+          },
+          "xml_root": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Xml Root",
+            "default": "root"
+          },
+          "template": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Template"
+          },
+          "other_template": {
+            "type": "string",
+            "maxLength": 50000,
+            "title": "Other Template",
+            "default": ""
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": ""
+          },
+          "replacements": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Replacements"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "template"
+        ],
+        "title": "TemplateToolsRequest"
+      },
+      "TransformationChatRequest": {
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "REQUEST",
+              "RESPONSE"
+            ],
+            "title": "Direction",
+            "description": "REQUEST or RESPONSE"
+          },
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Additionalproperties"
+          },
+          "headers": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Headers"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
+          },
+          "source": {
+            "$ref": "#/components/schemas/TransformationPayload"
+          },
+          "target": {
+            "$ref": "#/components/schemas/TransformationPayload"
+          },
+          "validations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Validations"
+          },
+          "mappings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Mappings"
+          },
+          "use_learned": {
+            "type": "boolean",
+            "title": "Use Learned",
+            "default": false
+          },
+          "filters": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Filters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "direction",
+          "source",
+          "target"
+        ],
+        "title": "TransformationChatRequest"
+      },
+      "TransformationPayload": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "default": "JSON"
+          },
+          "payload": {
+            "title": "Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "title": "TransformationPayload"
+      },
+      "TransformationTestRequest": {
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "REQUEST",
+              "RESPONSE"
+            ],
+            "title": "Direction",
+            "default": "RESPONSE"
+          },
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Additionalproperties"
+          },
+          "headers": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Headers"
+          },
+          "template": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Template"
+          },
+          "input_payload": {
+            "title": "Input Payload"
+          },
+          "source_format": {
+            "type": "string",
+            "enum": [
+              "JSON",
+              "XML",
+              "ISO"
+            ],
+            "title": "Source Format",
+            "default": "JSON"
+          },
+          "target_format": {
+            "type": "string",
+            "enum": [
+              "JSON",
+              "XML",
+              "ISO"
+            ],
+            "title": "Target Format",
+            "default": "JSON"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template",
+          "input_payload"
+        ],
+        "title": "TransformationTestRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "ApiEnvelope": {
+        "type": "object",
+        "required": [
+          "st",
+          "msg",
+          "msgId",
+          "data"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "st": {
+            "type": "boolean"
+          },
+          "msg": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failure"
+            ]
+          },
+          "msgId": {
+            "type": "string"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {}
+              }
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "GatewayKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Gateway-Key"
+      },
+      "GatewayIdentity": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Authenticated-User"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000/api/v2",
+      "description": "Replace with your deployment URL"
+    }
+  ]
+}

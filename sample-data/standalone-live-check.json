@@ -1,0 +1,68 @@
+{
+  "health": true,
+  "generation": true,
+  "payload_generator": true,
+  "render_http_status": 200,
+  "render_passed": true,
+  "database": "isolated local SQLite; not PostgreSQL acceptance",
+  "interpreter": "D:\\transformatio-agent\\backend\\.venv\\Scripts\\python.exe",
+  "reviewed_feedback": true,
+  "model": {
+    "available": true,
+    "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+    "targets": [
+      "value",
+      "result",
+      "data",
+      "mappedValue",
+      "total",
+      "totalAmount",
+      "charge",
+      "chargeAmount",
+      "paidAmount",
+      "balance",
+      "grossAmount",
+      "netAmount",
+      "fee",
+      "tax",
+      "paymentAmount",
+      "settledAmount",
+      "requestedAmount",
+      "debitAmount",
+      "creditAmount",
+      "transferAmount"
+    ],
+    "formats": {
+      "JSON": [
+        "value",
+        "result",
+        "data",
+        "mappedValue",
+        "total",
+        "totalAmount",
+        "charge",
+        "chargeAmount",
+        "paidAmount",
+        "balance",
+        "grossAmount",
+        "netAmount",
+        "fee",
+        "tax",
+        "paymentAmount",
+        "settledAmount",
+        "requestedAmount",
+        "debitAmount",
+        "creditAmount",
+        "transferAmount"
+      ],
+      "XML": [
+        "value",
+        "total",
+        "totalAmount",
+        "result"
+      ]
+    },
+    "scope": "REQUEST JSON \u2192 JSON or XML, one numeric amount field only. XML uses a Payment root and four supported elements.",
+    "warning": "Experimental own model. Learned-schema tests are not general accuracy. Every output requires execution, exact mapping checks and human review. No rule-based fallback."
+  }
+}

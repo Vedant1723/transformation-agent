@@ -1,0 +1,244 @@
+{
+  "info": {
+    "name": "Biller AI v2 \u2014 backend handoff",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "Transformations",
+      "item": [
+        {
+          "name": "POST /transformations/generate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/generate",
+            "header": [
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "\nGenerated from OpenAPI. Replace IDs and placeholder bodies; do not bulk-run mutating requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"amount\": 25\n    }\n  },\n  \"target\": {\n    \"format\": \"JSON\",\n    \"payload\": {\n      \"total\": 0\n    }\n  },\n  \"mappings\": {\n    \"total\": \"amount\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test(\"Response envelope\", () => { pm.expect(body).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(body.st).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /transformations/test",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/test",
+            "header": [
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Return failed-test evidence as data; unavailable infrastructure stays an HTTP error.\nGenerated from OpenAPI. Replace IDs and placeholder bodies; do not bulk-run mutating requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direction\": \"REQUEST\",\n  \"source_format\": \"JSON\",\n  \"target_format\": \"JSON\",\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"total\\\":${body.request.amount?c}}\",\n  \"input_payload\": {\n    \"amount\": 25\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test(\"Response envelope\", () => { pm.expect(body).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(body.st).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /transformations/tools",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/tools",
+            "header": [
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "\nGenerated from OpenAPI. Replace IDs and placeholder bodies; do not bulk-run mutating requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"inspect\",\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"total\\\":${body.request.amount?c}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test(\"Response envelope\", () => { pm.expect(body).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(body.st).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /transformations/model",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/transformations/model",
+            "header": [
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              }
+            ],
+            "description": "\nGenerated from OpenAPI. Replace IDs and placeholder bodies; do not bulk-run mutating requests."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test(\"Response envelope\", () => { pm.expect(body).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(body.st).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /transformations/feedback",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transformations/feedback",
+            "header": [
+              {
+                "key": "X-Gateway-Key",
+                "value": "{{gatewayKey}}"
+              },
+              {
+                "key": "X-Authenticated-User",
+                "value": "{{gatewayUser}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "\nGenerated from OpenAPI. Replace IDs and placeholder bodies; do not bulk-run mutating requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"direction\": \"REQUEST\",\n    \"source\": {\n      \"format\": \"JSON\",\n      \"payload\": {\n        \"amount\": 25\n      }\n    },\n    \"target\": {\n      \"format\": \"JSON\",\n      \"payload\": {\n        \"total\": 0\n      }\n    },\n    \"mappings\": {\n      \"total\": \"amount\"\n    }\n  },\n  \"template\": \"<#assign body=JsonUtils.getJsonAsMap(input)>{\\\"total\\\":${body.request.amount?c}}\",\n  \"expected_output\": \"{\\\"total\\\":25}\",\n  \"comment\": \"Verified synthetic amount mapping\",\n  \"approved\": true,\n  \"sanitized\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test(\"Response envelope\", () => { pm.expect(body).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(body.st).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health",
+            "header": [],
+            "description": "\nGenerated from OpenAPI. Replace IDs and placeholder bodies; do not bulk-run mutating requests."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test(\"Response envelope\", () => { pm.expect(body).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(body.st).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "checkpoint_unchanged": true,
+  "cases": [
+    {
+      "input": {
+        "amount": 25
+      },
+      "target": "value",
+      "format": "JSON",
+      "result": {
+        "passed": true,
+        "render_passed": true,
+        "mapping_passed": true,
+        "mapping_warning": "",
+        "infrastructure_error": false,
+        "engine": "own-model-experimental",
+        "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+        "checkpoint_sha256": "91c8f4b026d4d2835f3de962e980e4b48ac3ac3562a1e2910109ce3c6c70a6bf",
+        "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"header\": headers!(body.header!{})}>\n\n{\"value\": ${body.request.amount?number?c}}",
+        "output": "\n{\"value\": 25}",
+        "expected": "{\"value\": 25}",
+        "error": "",
+        "stage": "comparison",
+        "source": {
+          "amount": 25
+        },
+        "target_field": "value",
+        "target_format": "JSON",
+        "approved": false,
+        "fallback_used": false
+      }
+    },
+    {
+      "input": {
+        "amount": 25
+      },
+      "target": "total",
+      "format": "XML",
+      "result": {
+        "passed": true,
+        "render_passed": true,
+        "mapping_passed": true,
+        "mapping_warning": "",
+        "infrastructure_error": false,
+        "engine": "own-model-experimental",
+        "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+        "checkpoint_sha256": "91c8f4b026d4d2835f3de962e980e4b48ac3ac3562a1e2910109ce3c6c70a6bf",
+        "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"header\": headers!(body.header!{})}>\n\n<Payment>\n  <total>${body.request.amount?string?xml}</total>\n</Payment>\n",
+        "output": "\n<Payment>\n  <total>25</total>\n</Payment>\n",
+        "expected": "<Payment><total>25</total></Payment>",
+        "error": "",
+        "stage": "comparison",
+        "source": {
+          "amount": 25
+        },
+        "target_field": "total",
+        "target_format": "XML",
+        "approved": false,
+        "fallback_used": false
+      }
+    },
+    {
+      "input": {
+        "amount": 0
+      },
+      "target": "value",
+      "format": "JSON",
+      "result": {
+        "passed": true,
+        "render_passed": true,
+        "mapping_passed": true,
+        "mapping_warning": "",
+        "infrastructure_error": false,
+        "engine": "own-model-experimental",
+        "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+        "checkpoint_sha256": "91c8f4b026d4d2835f3de962e980e4b48ac3ac3562a1e2910109ce3c6c70a6bf",
+        "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"header\": headers!(body.header!{})}>\n\n{\"value\": ${body.request.amount?number?c}}",
+        "output": "\n{\"value\": 0}",
+        "expected": "{\"value\": 0}",
+        "error": "",
+        "stage": "comparison",
+        "source": {
+          "amount": 0
+        },
+        "target_field": "value",
+        "target_format": "JSON",
+        "approved": false,
+        "fallback_used": false
+      }
+    },
+    {
+      "input": {
+        "amount": -2.5
+      },
+      "target": "charge",
+      "format": "JSON",
+      "result": {
+        "passed": true,
+        "render_passed": true,
+        "mapping_passed": true,
+        "mapping_warning": "",
+        "infrastructure_error": false,
+        "engine": "own-model-experimental",
+        "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+        "checkpoint_sha256": "91c8f4b026d4d2835f3de962e980e4b48ac3ac3562a1e2910109ce3c6c70a6bf",
+        "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"header\": headers!(body.header!{})}>\n\n{\"charge\": ${body.request.amount?number?c}}",
+        "output": "\n{\"charge\": -2.5}",
+        "expected": "{\"charge\": -2.5}",
+        "error": "",
+        "stage": "comparison",
+        "source": {
+          "amount": -2.5
+        },
+        "target_field": "charge",
+        "target_format": "JSON",
+        "approved": false,
+        "fallback_used": false
+      }
+    },
+    {
+      "input": {
+        "amount": 123
+      },
+      "target": "result",
+      "format": "XML",
+      "result": {
+        "passed": true,
+        "render_passed": true,
+        "mapping_passed": true,
+        "mapping_warning": "",
+        "infrastructure_error": false,
+        "engine": "own-model-experimental",
+        "checkpoint": "expanded-resume-20260921-114948/checkpoint.pt",
+        "checkpoint_sha256": "91c8f4b026d4d2835f3de962e980e4b48ac3ac3562a1e2910109ce3c6c70a6bf",
+        "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"header\": headers!(body.header!{})}>\n\n<Payment>\n  <result>${body.request.amount?string?xml}</result>\n</Payment>\n",
+        "output": "\n<Payment>\n  <result>123</result>\n</Payment>\n",
+        "expected": "<Payment><result>123</result></Payment>",
+        "error": "",
+        "stage": "comparison",
+        "source": {
+          "amount": 123
+        },
+        "target_field": "result",
+        "target_format": "XML",
+        "approved": false,
+        "fallback_used": false
+      }
+    }
+  ],
+  "render_passed": 5,
+  "mapping_passed": 5,
+  "note": "Small smoke/probe set; not a general accuracy benchmark."
+}

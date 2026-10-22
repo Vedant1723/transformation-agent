@@ -1,0 +1,476 @@
+{
+  "runner": "Python HTTP replay of Postman request bodies; JavaScript assertions not executed by Newman",
+  "database": "isolated local SQLite",
+  "passed": 78,
+  "total": 78,
+  "results": [
+    {
+      "folder": "",
+      "name": "Health",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "",
+      "name": "Model availability (not inference)",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to JSON",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to JSON",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to JSON",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to JSON",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to XML",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to XML",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to XML",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to XML",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to ISO",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to ISO",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to ISO",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: JSON to ISO",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to JSON",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to JSON",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to JSON",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to JSON",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to XML",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to XML",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to XML",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to XML",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to ISO",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to ISO",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to ISO",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: XML to ISO",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to JSON",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to JSON",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to JSON",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to JSON",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to XML",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to XML",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to XML",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to XML",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to ISO",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to ISO",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to ISO",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "REQUEST: ISO to ISO",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to JSON",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to JSON",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to JSON",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to JSON",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to XML",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to XML",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to XML",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to XML",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to ISO",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to ISO",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to ISO",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: JSON to ISO",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to JSON",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to JSON",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to JSON",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to JSON",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to XML",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to XML",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to XML",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to XML",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to ISO",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to ISO",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to ISO",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: XML to ISO",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to JSON",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to JSON",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to JSON",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to JSON",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to XML",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to XML",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to XML",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to XML",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to ISO",
+      "name": "1 Generate",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to ISO",
+      "name": "2 Render original input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to ISO",
+      "name": "3 Generate dummy input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "RESPONSE: ISO to ISO",
+      "name": "4 Render generated input",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "",
+      "name": "Feedback: synthetic approved correction (writes data)",
+      "http_status": 201,
+      "passed": true
+    },
+    {
+      "folder": "",
+      "name": "Tools: inspect",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "",
+      "name": "Tools: compare",
+      "http_status": 200,
+      "passed": true
+    },
+    {
+      "folder": "",
+      "name": "Tools: revise",
+      "http_status": 200,
+      "passed": true
+    }
+  ]
+}
