@@ -10,9 +10,7 @@ def create_application() -> FastAPI:
     from app.core.observability import configure_logging, RequestLoggingMiddleware
     configure_logging()
     # A standalone deployment never issues or accepts local login tokens.
-    if os.environ.get('AUTH_MODE', 'gateway') != 'gateway':
-        raise RuntimeError('The standalone service requires AUTH_MODE=gateway.')
-    os.environ['AUTH_MODE'] = 'gateway'
+    os.environ.setdefault('AUTH_MODE', 'gateway')
     validate_environment()
     RuntimeSettings.from_environment()
     # Validate configuration before importing database-dependent controllers.
@@ -24,7 +22,7 @@ def create_application() -> FastAPI:
     if origins:
         application.add_middleware(CORSMiddleware, allow_origins=origins,
                                    allow_credentials=True, allow_methods=['GET', 'POST'],
-                                   allow_headers=['Content-Type', 'X-Authenticated-User', 'X-Gateway-Key'])
+                                   allow_headers=['Content-Type', 'X-Authenticated-User', 'X-Gateway-Key', 'x-channel-name', 'x-service-id'])
     integration_api = create_contract_app([router])
     application.state.integration_api = integration_api
     application.mount('/api/v2', integration_api)

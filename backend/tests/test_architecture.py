@@ -23,7 +23,7 @@ def test_service_layer_has_no_controllers_or_dependency_injection():
 
 @pytest.fixture
 def client():
-    api = next(route.app for route in app.routes if getattr(route, 'path', '') == '/api/v2')
+    api = app.state.integration_api
     api.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=1)
     api.dependency_overrides[get_db] = lambda: object()
     with TestClient(app) as client:
@@ -37,7 +37,7 @@ def test_generate_controller_preserves_contract(client, monkeypatch):
         observed.append((request.source.payload, user.id))
         return {'success': True, 'data': {'template': 'example'}}
     monkeypatch.setattr(transformations, 'transformation_chat', generate)
-    response = client.post('/api/v2/transformations/generate', json={
+    response = client.post('/transformation-agent/api/v2/transformations/generate', json={
         'direction': 'REQUEST', 'source': {'payload': {'amount': 25}},
         'target': {'payload': {'total': 0}}})
     assert response.status_code == 200
@@ -47,14 +47,14 @@ def test_generate_controller_preserves_contract(client, monkeypatch):
 
 def test_failed_template_is_not_transport_failure(client, monkeypatch):
     monkeypatch.setattr(transformations, 'test_template', lambda *args: {'success': True, 'data': {'passed': False}})
-    response = client.post('/api/v2/transformations/test', json={'template': 'bad', 'input_payload': {}})
+    response = client.post('/transformation-agent/api/v2/transformations/test', json={'template': 'bad', 'input_payload': {}})
     assert response.status_code == 200
     assert response.json()['st'] is True
     assert response.json()['data']['passed'] is False
 
 
 def test_validation_error_envelope(client):
-    response = client.post('/api/v2/transformations/generate', json={})
+    response = client.post('/transformation-agent/api/v2/transformations/generate', json={})
     assert response.status_code == 422
     assert set(response.json()) == {'st', 'msg', 'msgId', 'data'}
     assert response.json()['st'] is False
@@ -62,12 +62,12 @@ def test_validation_error_envelope(client):
 
 def test_untrusted_gateway_rejected(monkeypatch):
     monkeypatch.setenv('GATEWAY_SHARED_SECRET', 'synthetic-test-secret-' * 3)
-    response = TestClient(app).get('/api/v2/transformations/model')
+    response = TestClient(app).get('/transformation-agent/api/v2/transformations/model')
     assert response.status_code == 401
     assert response.json()['msgId'] == 'UNAUTHORIZED'
 
 
 def test_no_local_auth_in_openapi():
-    schema = TestClient(app).get('/api/v2/openapi.json').json()
+    schema = TestClient(app).get('/transformation-agent/api/v2/openapi.json').json()
     assert 'HTTPBearer' not in schema.get('components', {}).get('securitySchemes', {})
     assert len(schema['paths']) == 6

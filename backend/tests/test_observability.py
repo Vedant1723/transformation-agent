@@ -40,7 +40,7 @@ def test_method_logging_redacts_arguments_results_and_exception_text(logs):
 
 def test_request_id_and_query_redaction(logs):
     client = TestClient(app)
-    response = client.get('/health?password=private-token-123', headers={'Authorization': 'Bearer private-token-123'})
+    response = client.get('/transformation-agent/health?password=private-token-123', headers={'Authorization': 'Bearer private-token-123'})
     assert response.status_code == 200
     request_id = response.headers['X-Request-ID']
     assert len(request_id) == 32

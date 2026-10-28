@@ -7,10 +7,10 @@ from app.transformations.payload_generator import generate_payload
 
 def test_minimal_public_surface():
     client=TestClient(app)
-    paths=client.get('/api/v2/openapi.json').json()['paths']
+    paths=client.get('/transformation-agent/api/v2/openapi.json').json()['paths']
     assert len(paths)==6
     assert client.post('/api/v1/auth/login').status_code==404
-    assert client.get('/api/v2/health').json()['st'] is True
+    assert client.get('/transformation-agent/api/v2/health').json()['st'] is True
 
 
 def test_request_envelope():
