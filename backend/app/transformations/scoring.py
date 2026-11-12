@@ -39,7 +39,7 @@ def score_case(record, mode):
             payload = normalized
         result['stage'] = 'runtime'
         rendered = FreeMarkerRuntimeClient().execute(result['template'], payload, context['direction'],
-            context.get('additionalProperties'), context.get('headers'))
+            context.get('additionalProperties'), context.get('headers'), source_format=context['source']['format'], target_format=context['target']['format'], ideal_object=example['test']['output'])
         result['actual'] = rendered.get('output', '')
         if not rendered.get('success'):
             raise ValueError(rendered.get('error') or rendered.get('message') or 'Rendering failed')

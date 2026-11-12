@@ -1,5 +1,6 @@
 from app.core.observability import traced as _log_traced, exception_event as _log_exception
 from typing import Any, Dict
+import json
 
 import httpx
 from dataclasses import replace
@@ -18,6 +19,8 @@ class FreeMarkerRuntimeClient:
 
     @_log_traced('app.transformations.runtime_client.FreeMarkerRuntimeClient.health', level=10)
     def health(self, timeout=3.0):
+        if self.settings.protocol == 'sculpt':
+            return {'status': 'NOT_CHECKED', 'reason': 'Sculpt has no health endpoint.'}
         response = httpx.get(
             self.base_url + self.settings.health_path,
             headers=self.settings.headers(), timeout=min(timeout, self.settings.timeout_seconds),
@@ -33,17 +36,40 @@ class FreeMarkerRuntimeClient:
         direction: str = 'RESPONSE',
         additionalProperties=None,
         headers=None,
+        source_format='JSON',
+        target_format='JSON',
+        ideal_object=None,
     ) -> Dict[str, Any]:
 
-        response = httpx.post(
-            self.base_url + self.settings.transform_path,
-            json={
+        path = self.settings.transform_path
+        body = {
                 "template": runtime_template(template, direction),
                 "input": input_payload,
                 "direction": direction,
                 "additionalProperties": additionalProperties or {},
                 "headers": headers or {},
-            },
+            }
+        if self.settings.protocol == 'sculpt':
+            if direction not in ('REQUEST', 'RESPONSE'):
+                raise ValueError('Direction must be REQUEST or RESPONSE.')
+            source_format, target_format = source_format.upper(), target_format.upper()
+            if source_format not in ('JSON', 'XML', 'ISO') or target_format not in ('JSON', 'XML', 'ISO'):
+                raise ValueError('Unsupported transformation format.')
+            body = {'type': source_format + 'TO' + target_format,
+                    'template': runtime_template(template, direction)}
+            if direction == 'REQUEST':
+                path = self.settings.request_path
+                body['input'] = {'inputRequest': input_payload, 'inputHeaders': headers or {},
+                                 'additionalProperties': additionalProperties or {}}
+            else:
+                path = self.settings.response_path
+                body.update(responseObj=input_payload,
+                    # Sculpt renders only; expected-output comparison stays local.
+                    idealObject='',
+                    input={'additionalProperties': additionalProperties or {}})
+        response = httpx.post(
+            self.base_url + path,
+            json=body,
             headers=self.settings.headers(),
             timeout=self.settings.timeout_seconds,
         )
@@ -52,6 +78,16 @@ class FreeMarkerRuntimeClient:
 
         try:
             result = response.json()
+            if self.settings.protocol == 'sculpt':
+                if not isinstance(result, dict) or type(result.get('st')) is not bool:
+                    raise ValueError('Invalid Sculpt response.')
+                if result['st']:
+                    if not isinstance(result.get('data'), str):
+                        raise ValueError('Sculpt output must be text.')
+                    result = {'success': True, 'output': result['data']}
+                else:
+                    detail = result.get('validationError') or result.get('devErrorMessage') or result.get('msg') or 'Sculpt rejected the transformation.'
+                    result = {'success': False, 'output': '', 'error': detail if isinstance(detail, str) else json.dumps(detail)}
             if not isinstance(result, dict) or not isinstance(result.get('success'), bool):
                 raise ValueError('Invalid execution response.')
             if result['success'] and not isinstance(result.get('output'), str):

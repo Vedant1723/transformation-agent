@@ -33,7 +33,7 @@ def test_template(request: TransformationTestRequest,
         payload = normalize(request.input_payload, request.source_format)
         stage = 'runtime'
         runtime_payload = request.input_payload if request.source_format == 'XML' and 'JsonUtils.getJsonAsMap(input)' not in request.template else payload
-        rendered = FreeMarkerRuntimeClient().execute(request.template, runtime_payload, request.direction, request.additionalProperties, request.headers)
+        rendered = FreeMarkerRuntimeClient().execute(request.template, runtime_payload, request.direction, request.additionalProperties, request.headers, source_format=request.source_format, target_format=request.target_format)
         output = rendered.get('output', '')
         if not rendered.get('success'):
             raise ValueError(rendered.get('error') or rendered.get('message') or 'Rendering failed.')
@@ -66,7 +66,7 @@ def test_template(request: TransformationTestRequest,
         _log_exception('app.services.transformations:58', handled=True)
         error = str(exc)
     data = {'passed': stage == 'passed', 'stage': stage, 'error': error, 'output': output,
-            'suggestions': suggest(request.template, request.input_payload, request.source_format, request.target_format, error, request.direction, request.additionalProperties, request.headers) if error and stage in ('runtime','output') else [],
+            'suggestions': suggest(request.template, request.input_payload, request.source_format, request.target_format, error, request.direction, request.additionalProperties, request.headers, source_format=request.source_format, target_format=request.target_format) if error and stage in ('runtime','output') else [],
             'findings': findings(request.template,error,stage) if error else [],
             'guidance': ('FreeMarker execution and output syntax checks passed. No repair is needed for this sample; verify business correctness with representative inputs.' if stage == 'passed' else
                          'FreeMarker executed successfully, but the output format is invalid. Review output-format fixes below.' if stage == 'output' else
@@ -255,7 +255,7 @@ def execute_approved_transformation(request: TransformationExecuteRequest,
         # New XML templates use the DOM model. Keep map-based saved templates renderable.
         if request.source_format.upper() == 'XML' and 'JsonUtils.getJsonAsMap(input)' not in request.template:
             payload = request.input_payload
-        result = FreeMarkerRuntimeClient().execute(request.template, payload, request.direction, request.additionalProperties, request.headers)
+        result = FreeMarkerRuntimeClient().execute(request.template, payload, request.direction, request.additionalProperties, request.headers, source_format=request.source_format, target_format=request.target_format)
         output = result.get('output', '')
         if not result.get('success'):
             raise ValueError(result.get('error') or result.get('message', 'Rendering failed.'))
