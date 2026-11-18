@@ -56,7 +56,7 @@ def test_listing_and_payload_generation(client):
     response = client.post('/transformation-agent/api/v2/transformations/tools', json={
         'action': 'generate_payload', 'template': template, 'direction': 'REQUEST'})
     assert response.status_code == 200, response.text
-    assert response.json()['data']['cases']
+    assert response.json()['data']['input_payload']
 
 
 def test_metadata_conflict_rejected(client):

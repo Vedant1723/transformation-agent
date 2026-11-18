@@ -96,6 +96,8 @@ class TransformationTestRequest(RequestContext):
 
 class TemplateToolsRequest(BaseModel):
     action: Literal['inspect','compare','revise','generate_payload']
+    type: Optional[Literal['JSONTOJSON','JSONTOXML','JSONTOISO','XMLTOJSON','XMLTOXML','XMLTOISO','ISOTOJSON','ISOTOXML','ISOTOISO']] = Field(
+        default=None, description='Transformation type. Payload generation uses the source format before TO.')
     source_format: Literal['JSON','XML','ISO'] = 'JSON'
     direction: Literal['REQUEST','RESPONSE'] = 'REQUEST'
     xml_root: str = Field(default='root',min_length=1,max_length=100)
@@ -103,3 +105,19 @@ class TemplateToolsRequest(BaseModel):
     other_template: str = Field(default='', max_length=50000)
     instructions: str = Field(default='', max_length=4000)
     replacements: list[Dict[str, str]] = Field(default_factory=list, max_length=30)
+
+    @model_validator(mode='before')
+    @classmethod
+    def derive_source_format(cls, values):
+        if not isinstance(values, dict) or values.get('type') is None:
+            return values
+        data = dict(values)
+        kind = data['type']
+        allowed = {source+'TO'+target for source in ('JSON','XML','ISO') for target in ('JSON','XML','ISO')}
+        if not isinstance(kind, str) or kind not in allowed:
+            raise ValueError('type must be a supported transformation type, for example JSONTOXML or XMLTOJSON.')
+        source = kind.split('TO', 1)[0]
+        if 'source_format' in data and data['source_format'] != source:
+            raise ValueError('source_format conflicts with type; omit source_format when sending type.')
+        data['source_format'] = source
+        return data

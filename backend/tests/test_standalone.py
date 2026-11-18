@@ -21,6 +21,6 @@ def test_request_envelope():
 
 
 def test_payload_generator():
-    case=generate_payload('${body.request.amount?c} ${body.headers.trace}')['cases'][0]
+    case=generate_payload('${body.request.amount?c} ${body.headers.trace}')
     assert case['input_payload']['inputRequest']=={'amount':10}
     assert case['input_payload']['headers']=={'trace':'DEMO_trace'}

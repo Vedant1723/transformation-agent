@@ -207,7 +207,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -389,7 +389,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -571,7 +571,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -753,7 +753,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -935,7 +935,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -1117,7 +1117,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -1299,7 +1299,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -1481,7 +1481,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -1663,7 +1663,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -1845,7 +1845,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -2027,7 +2027,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -2209,7 +2209,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -2391,7 +2391,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -2573,7 +2573,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -2755,7 +2755,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -2937,7 +2937,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -3119,7 +3119,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }
@@ -3301,7 +3301,7 @@
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"Response contract\", () => { pm.expect(r).to.have.all.keys(\"st\", \"msg\", \"msgId\", \"data\"); pm.expect(r.st).to.eql(true); });",
-                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.cases[0].input_payload));"
+                  "pm.collectionVariables.set(\"samplePayloadJSON\", JSON.stringify(r.data.input_payload));"
                 ]
               }
             }

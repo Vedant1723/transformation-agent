@@ -49,7 +49,7 @@ def test_format_matrix_and_generated_payload(client, direction, sf, tf):
     else: assert '4=25' in result['output']
     samples = post(client, 'tools', {'action': 'generate_payload', 'template': template,
         'source_format': sf, 'direction': direction, 'xml_root': 'payment'})
-    result = render(client, template, samples['cases'][0]['input_payload'], sf, tf, direction)
+    result = render(client, template, samples['input_payload'], sf, tf, direction)
     assert result['passed'], {'sample': samples, 'render': result}
 
 
