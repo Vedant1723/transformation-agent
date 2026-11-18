@@ -21,6 +21,7 @@ from app.schemas.transformations import TransformationTestRequest
 from app.transformations.json_validation import strict_json
 from app.transformations.runtime_client import FreeMarkerRuntimeClient
 from app.transformations.workbench import generate, normalize, xml_root, leaves, path_name
+from app.transformations.template_corrections import correct_bare_references
 
 
 
@@ -28,6 +29,9 @@ from app.transformations.workbench import generate, normalize, xml_root, leaves,
 def test_template(request: TransformationTestRequest,
                   current_user: UserModel, db: Session):
     """Return failed-test evidence as data; unavailable infrastructure stays an HTTP error."""
+    corrected, corrections = correct_bare_references(request.template)
+    if corrections:
+        request = request.model_copy(update={'template': corrected})
     output, error, stage = '', '', 'input'
     try:
         payload = normalize(request.input_payload, request.source_format)
@@ -66,12 +70,15 @@ def test_template(request: TransformationTestRequest,
         _log_exception('app.services.transformations:58', handled=True)
         error = str(exc)
     data = {'passed': stage == 'passed', 'stage': stage, 'error': error, 'output': output,
-            'suggestions': suggest(request.template, request.input_payload, request.source_format, request.target_format, error, request.direction, request.additionalProperties, request.headers, source_format=request.source_format, target_format=request.target_format) if error and stage in ('runtime','output') else [],
+            'suggestions': suggest(request.template, request.input_payload, request.source_format, request.target_format, error, request.direction, request.additionalProperties, request.headers) if error and stage in ('runtime','output') else [],
             'findings': findings(request.template,error,stage) if error else [],
             'guidance': ('FreeMarker execution and output syntax checks passed. No repair is needed for this sample; verify business correctness with representative inputs.' if stage == 'passed' else
                          'FreeMarker executed successfully, but the output format is invalid. Review output-format fixes below.' if stage == 'output' else
                          'FreeMarker failed. Review its actual error and the proposed fixes, then test your selected changes. No fixes are applied automatically.' if stage == 'runtime' else
                          'Input could not be parsed. Correct the input before running FreeMarker.')}
+    if corrections:
+        data.update(corrected_template=corrected, corrections=corrections,
+                    warnings=['Bare dollar references were corrected before execution. Review corrected_template.'])
     save_run(db, current_user, 'TRANSFORMATION_TEST', 'Template test ' + ('passed.' if data['passed'] else 'failed.'),
              {'request': request.model_dump(), **data})
     return {'success': True, 'data': data}

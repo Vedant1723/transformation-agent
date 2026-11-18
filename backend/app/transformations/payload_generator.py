@@ -3,6 +3,7 @@ from app.core.observability import traced as _log_traced, exception_event as _lo
 import re
 from lxml import etree
 from app.transformations.template_tools import REFERENCE
+from app.transformations.template_corrections import correct_bare_references
 
 
 @_log_traced('app.transformations.payload_generator.generate_payload', level=10)
@@ -13,10 +14,16 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
         raise ValueError('direction must be REQUEST or RESPONSE.')
     if not isinstance(template, str) or not template.strip() or len(template)>50000:
         raise ValueError('Provide a template between 1 and 50000 characters.')
+    template, corrections = correct_bare_references(template)
     clean=re.sub(r'<#--[\s\S]*?-->','',template)
     warnings=['Synthetic input inferred from static references. Review values and run Test; validation rules and dynamic expressions may require edits.']
     # Resolve aliases within their lexical loop scope, including scalar lists.
-    scopes=[]; chunks=[]; loop_paths=[]
+    scopes=[]; chunks=[]; loop_paths=[]; derived={}; sample_hints={}
+    def regex_source(expression):
+        match=re.fullmatch(r'(.+?)\?matches\((.*)\)',expression.strip(),re.S)
+        if match and REFERENCE.fullmatch(match[1]) and match[1].startswith(('body.','body[')):
+            return match[1], match[2]
+        return None
     def expand(text):
         aliases={}
         for scope in scopes:aliases.update(scope)
@@ -29,6 +36,17 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
             if not match:raise ValueError('Unsupported list expression; provide a sample manually.')
             path=expand(match[1]).strip()
             path=re.sub(r'!\[\]$', '', path).strip().strip('()')
+            # A regex result is a derived sequence, not an array in the input.
+            regex=derived.get(path) or regex_source(expand(match[1]).strip())
+            if regex:
+                reference, arguments=regex
+                chunks.append(reference)
+                if re.match(r'''r?(["'])(?:\\d\+|\[0-9\]\+)\1(?:\s*,|\s*$)''',arguments.strip()):
+                    sample_hints[reference]='256700000001'
+                else:
+                    warnings.append('Regex-derived list detected. Its source is scalar text; review the sample against the regex before testing.')
+                scopes.append({match[2]:'__derived_regex_item'})
+                continue
             if not REFERENCE.fullmatch(path) or not path.startswith(('body.','body[')):
                 raise ValueError('Dynamic or filtered list sources require a supplied sample.')
             path+='[0]';loop_paths.append(path)
@@ -36,7 +54,13 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
         elif part.startswith('</#list'):
             if not scopes:raise ValueError('Unexpected closing list directive.')
             scopes.pop()
-        else:chunks.append(expand(part))
+        else:
+            expanded_part=expand(part)
+            chunks.append(expanded_part)
+            for assignment in re.finditer(r'<#assign\s+(\w+)\s*=\s*([^>]+)>',expanded_part):
+                derived.pop(assignment[1],None)
+                regex=regex_source(assignment[2])
+                if regex:derived[assignment[1]]=regex
     if scopes:raise ValueError('Unclosed list directive.')
     expanded=''.join(chunks)
     refs=sorted(set(REFERENCE.findall(expanded)) | set(loop_paths))
@@ -77,6 +101,11 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
         name=str(path[-1]).lower()
         numeric=bool(re.search(re.escape(reference)+r'\?(?:number|c)\b',expanded)) or name in ('amount','quantity','price','total','count','unitprice')
         value=10 if numeric else True if name in ('enabled','active','isactive') else 'DEMO_'+str(path[-1])
+        # Prefer an explicit string equality example when unambiguous. This is
+        # a sample hint, not a solver for arbitrary FreeMarker conditions.
+        equalities=set(re.findall(re.escape(reference)+r'''\s*==\s*["']([^"'\r\n]*)["']''',expanded))
+        if len(equalities)==1 and not numeric:value=next(iter(equalities))
+        if reference in sample_hints and not equalities:value=sample_hints[reference]
         put(destination,path,value)
     if data is None:
         if props or headers:data={}
@@ -107,7 +136,10 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
             else:node.text=str(value).lower() if isinstance(value,bool) else '' if value is None else str(value)
         for k,v in payload.items():append(root,k,v)
         return etree.tostring(root,encoding='unicode',pretty_print=True)
-    return {'source_format':source_format,'direction':direction,'warnings':warnings,'inferred_references':refs,
+    if corrections:
+        warnings.append('Bare dollar references were corrected to FreeMarker interpolation. Use corrected_template when testing this payload.')
+    return {**({'corrected_template':template,'corrections':corrections} if corrections else {}),
+            'source_format':source_format,'direction':direction,'warnings':warnings,'inferred_references':refs,
             'input_payload':({'inputRequest':serialize(data),'inputHeaders':headers,'additionalProperties':props}
                              if direction=='REQUEST' else serialize(data)),
             'verified':False}
