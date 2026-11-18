@@ -2,6 +2,8 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException
 
 DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
 if not DATABASE_URL:
@@ -17,6 +19,10 @@ def get_db():
     try:
         with SessionLocal() as db:
             yield db
+    except (RequestValidationError, HTTPException):
+        # Yield dependencies also receive request errors from downstream handlers.
+        # These are not database connection or transaction failures.
+        raise
     except Exception as exc:
         exception_event('database.request_session', exc)
         raise

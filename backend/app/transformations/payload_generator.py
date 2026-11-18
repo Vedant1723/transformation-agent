@@ -108,6 +108,6 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
         for k,v in payload.items():append(root,k,v)
         return etree.tostring(root,encoding='unicode',pretty_print=True)
     return {'source_format':source_format,'direction':direction,'warnings':warnings,'inferred_references':refs,
-            'input_payload':({'inputRequest':serialize(data),'headers':headers,'additionalProperties':props}
+            'input_payload':({'inputRequest':serialize(data),'inputHeaders':headers,'additionalProperties':props}
                              if direction=='REQUEST' else serialize(data)),
             'verified':False}

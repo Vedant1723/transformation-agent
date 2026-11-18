@@ -14,7 +14,7 @@ def test_one_payload_for_each_source_and_direction(fmt, direction):
     assert result['verified'] is False
     payload = result['input_payload']
     if direction == 'REQUEST':
-        assert set(payload) == {'inputRequest', 'headers', 'additionalProperties'}
+        assert set(payload) == {'inputRequest', 'inputHeaders', 'additionalProperties'}
         payload = payload['inputRequest']
     assert isinstance(payload, dict if fmt == 'JSON' else str)
 
@@ -54,7 +54,7 @@ def test_json_root_array(direction):
 
 def test_metadata_only_and_header_aliases():
     payload = generate_payload('${body.header["x-id"]} ${body.headers.trace} ${body.addProps.region}')['input_payload']
-    assert payload == {'inputRequest': {}, 'headers': {'x-id':'DEMO_x-id', 'trace':'DEMO_trace'}, 'additionalProperties':{'region':'DEMO_region'}}
+    assert payload == {'inputRequest': {}, 'inputHeaders': {'x-id':'DEMO_x-id', 'trace':'DEMO_trace'}, 'additionalProperties':{'region':'DEMO_region'}}
 
 
 def test_response_preserves_fields_named_like_metadata():

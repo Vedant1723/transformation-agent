@@ -60,3 +60,21 @@ def test_conflicting_wrapper_format(client):
 def test_mapping_separators_and_ambiguity():
     assert choose(('fullName',), {'full_name':(('full_name',),'Alice')})[0] == 'full_name'
     assert choose(('fullName',), {'a.full_name':(('a','full_name'),'Alice'), 'b.fullName':(('b','fullName'),'Bob')})[0] == ''
+
+
+def test_exact_frontend_example(client):
+    result = client.post(URL, json={
+        'direction':'REQUEST', 'type':'JSONTOXML',
+        'source':{'name':'Alice','amount':25},
+        'target':'<Payment><fullName></fullName><amount>0</amount></Payment>'})
+    assert result.status_code == 200, result.text
+    assert result.json()['st'] is True
+    assert 'body.request.name' in result.json()['data']['template']
+
+
+def test_validation_error_explains_missing_field(client):
+    result = client.post(URL, json={'direction':'REQUEST','source':{'name':'Alice'}})
+    assert result.status_code == 422
+    errors = result.json()['data']['detail']
+    assert any(e['loc'] == ['body','target'] and e['msg'] == 'Required field is missing.' for e in errors)
+    assert 'Alice' not in result.text

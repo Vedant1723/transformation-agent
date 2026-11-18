@@ -33,7 +33,7 @@ def test_generate_then_sample(client, direction, source_format, target_format):
     assert data['verified'] is False
     payload = data['input_payload']
     if direction == 'REQUEST':
-        assert set(payload) == {'inputRequest', 'headers', 'additionalProperties'}
+        assert set(payload) == {'inputRequest', 'inputHeaders', 'additionalProperties'}
         payload = payload['inputRequest']
     if source_format == 'JSON':
         assert isinstance(payload, dict)

@@ -70,7 +70,17 @@ def create_contract_app(routers):
     @api.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
         # Do not echo submitted passwords, tokens, payloads or Pydantic ctx objects.
-        errors = [{'loc':list(e['loc']), 'type':e['type'], 'msg':'Invalid value.'} for e in exc.errors()]
+        messages = {
+            'missing': 'Required field is missing.',
+            'model_attributes_type': 'Expected an object with the documented fields. Check the deployed API contract.',
+            'model_type': 'Expected an object with the documented fields.',
+            'dict_type': 'Expected a JSON object.',
+            'string_type': 'Expected a string.',
+            'literal_error': 'Value is not one of the supported options.',
+            'json_invalid': 'Request body is not valid JSON.',
+            'value_error': 'Invalid payload or conflicting formats. Check type, direction, source and target.',
+        }
+        errors = [{'loc':list(e['loc']), 'type':e['type'], 'msg':messages.get(e['type'],'Invalid value.')} for e in exc.errors()]
         return JSONResponse(envelope({'detail':errors},422), status_code=422)
 
     @api.exception_handler(Exception)

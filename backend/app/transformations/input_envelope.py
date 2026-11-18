@@ -4,7 +4,7 @@ from typing import Any
 
 from app.transformations.json_validation import strict_json
 
-ENVELOPE_FIELDS = frozenset({'inputRequest', 'headers', 'additionalProperties'})
+ENVELOPE_FIELDS = frozenset({'inputRequest', 'inputHeaders', 'headers', 'additionalProperties'})
 
 
 @_log_traced('app.transformations.input_envelope._resolve_metadata', level=10)
@@ -36,7 +36,14 @@ def unpack(
     if not isinstance(candidate, dict) or 'inputRequest' not in candidate:
         return payload, properties, headers
     if set(candidate) - ENVELOPE_FIELDS:
-        raise ValueError('Request envelope supports only inputRequest, headers and additionalProperties.')
+        raise ValueError('Request envelope supports inputRequest, inputHeaders and additionalProperties (headers is a legacy alias).')
+    candidate = dict(candidate)
+    if 'inputHeaders' in candidate:
+        if not isinstance(candidate['inputHeaders'], dict):
+            raise ValueError('inputHeaders must be an object.')
+        if 'headers' in candidate and candidate['headers'] != candidate['inputHeaders']:
+            raise ValueError('Conflicting inputHeaders and headers in request envelope.')
+        candidate['headers'] = candidate['inputHeaders']
     inner = candidate['inputRequest']
     if not isinstance(inner, (dict, str)):
         raise ValueError('inputRequest must be a JSON object, JSON string or XML string.')

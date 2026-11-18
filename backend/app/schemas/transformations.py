@@ -74,7 +74,8 @@ class TransformationChatRequest(RequestContext):
     source: TransformationPayload
     target: TransformationPayload
     validations: list[Dict[str, Any]] = Field(default_factory=list)
-    mappings: Dict[str, str] = Field(default_factory=dict)
+    mappings: Dict[str, str] = Field(default_factory=dict,
+        description='Optional target-to-source overrides. Omit or send an empty value for automatic mapping.')
     use_learned: bool = False
     filters: list[Dict[str, Any]] = Field(default_factory=list, max_length=20)
 
@@ -83,6 +84,10 @@ class TransformationChatRequest(RequestContext):
     def normalize_contract(cls, values):
         if not isinstance(values, dict):return values
         data = dict(values)
+        # Frontends commonly serialize an unselected optional control as null,
+        # an empty string or an empty array. Only empty values mean auto-map.
+        if data.get('mappings') is None or data.get('mappings') == '' or data.get('mappings') == []:
+            data['mappings'] = {}
         formats = None
         if data.get('type') is not None:
             kind = data['type']
