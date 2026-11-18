@@ -92,11 +92,13 @@ ALIASES = {
 
 @_log_traced('app.transformations.structure.choose', level=10)
 def choose(target_path, candidates):
-    leaf = str(target_path[-1]).lower()
+    # Partner contracts often vary only in casing and separators.
+    canonical = lambda value: re.sub(r'[_\s-]+', '', str(value)).lower()
+    leaf = canonical(target_path[-1])
     aliases = ALIASES.get(leaf, {leaf})
     scored = []
     for name, (path, value) in candidates.items():
-        source_leaf = str(path[-1]).lower()
+        source_leaf = canonical(path[-1])
         score = 1.0 if source_leaf == leaf else .94 if source_leaf in aliases else 0
         # Only close lexical matches; unrelated "id" fields must not win on a generic suffix.
         if not score:

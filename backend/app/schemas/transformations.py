@@ -2,6 +2,8 @@ from typing import Any, Dict, Optional, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+TransformationType = Literal['JSONTOJSON','JSONTOXML','JSONTOISO','XMLTOJSON','XMLTOXML','XMLTOISO','ISOTOJSON','ISOTOXML','ISOTOISO']
+
 
 class TransformationPayload(BaseModel):
     format: str = Field(default="JSON")
@@ -9,14 +11,24 @@ class TransformationPayload(BaseModel):
 
     @model_validator(mode='after')
     def detect_text_format(self):
+        from app.transformations.json_validation import strict_json
+        explicit = 'format' in self.model_fields_set
+        self.format = self.format.upper()
+        if self.format not in ('JSON', 'XML', 'ISO'):
+            raise ValueError('Supported formats: JSON, XML, ISO.')
         if isinstance(self.payload, str):
             text = self.payload.lstrip()
+            detected = None
             if text.startswith('<'):
-                self.format = 'XML'
+                detected = 'XML'
             elif text.startswith(('{', '[')) and self.format.upper() != 'ISO':
-                self.format = 'JSON'
+                detected = 'JSON'
             elif text and all('=' in line for line in text.splitlines() if line.strip()):
-                self.format = 'ISO'
+                detected = 'ISO'
+            if detected and explicit and detected != self.format:
+                raise ValueError('Payload content conflicts with the declared format.')
+            if detected and not explicit:self.format = detected
+            if self.format == 'JSON':self.payload = strict_json(self.payload)
         return self
 
 
@@ -54,6 +66,7 @@ class RequestContext(BaseModel):
 
 
 class TransformationChatRequest(RequestContext):
+    type: Optional[TransformationType] = None
     message: str = ""
     direction: Literal['REQUEST', 'RESPONSE'] = Field(
         description="REQUEST or RESPONSE"
@@ -64,6 +77,36 @@ class TransformationChatRequest(RequestContext):
     mappings: Dict[str, str] = Field(default_factory=dict)
     use_learned: bool = False
     filters: list[Dict[str, Any]] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode='before')
+    @classmethod
+    def normalize_contract(cls, values):
+        if not isinstance(values, dict):return values
+        data = dict(values)
+        formats = None
+        if data.get('type') is not None:
+            kind = data['type']
+            allowed = {s+'TO'+t for s in ('JSON','XML','ISO') for t in ('JSON','XML','ISO')}
+            if not isinstance(kind,str) or kind not in allowed:
+                raise ValueError('Use a supported type such as JSONTOXML or XMLTOJSON.')
+            formats = kind.split('TO',1)
+        for index, name in enumerate(('source','target')):
+            # Flat payload names are unambiguous even when a business object
+            # itself contains fields named payload or format.
+            flat = name + '_payload'
+            if flat in data:
+                if name in data:raise ValueError(f'Send either {flat} or {name}, not both.')
+                value = {'payload':data.pop(flat)}
+            elif name in data:
+                value = data[name]
+                value = dict(value) if isinstance(value,dict) and 'payload' in value and set(value) <= {'payload','format'} else {'payload':value}
+            else:continue
+            if formats:
+                if 'format' in value and value['format'] != formats[index]:
+                    raise ValueError(f'{name}.format conflicts with type.')
+                value['format'] = formats[index]
+            data[name] = value
+        return data
 
 
 class TransformationChatResponse(BaseModel):
