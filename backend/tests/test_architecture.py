@@ -70,4 +70,5 @@ def test_untrusted_gateway_rejected(monkeypatch):
 def test_no_local_auth_in_openapi():
     schema = TestClient(app).get('/transformation-agent/api/v2/openapi.json').json()
     assert 'HTTPBearer' not in schema.get('components', {}).get('securitySchemes', {})
-    assert len(schema['paths']) == 6
+    assert len(schema['paths']) == 7
+    assert '/transformations/mapping-fields' in schema['paths']

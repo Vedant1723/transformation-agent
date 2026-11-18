@@ -1,17 +1,27 @@
 """Public controllers: validate, resolve identity/session, delegate to services."""
 from app.core.observability import traced as _log_traced, exception_event as _log_exception
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.auth import get_current_user
 from app.database.session import get_db
 from app.models.user import UserModel
 from app.schemas.feedback import Feedback
-from app.schemas.transformations import TransformationChatRequest, TransformationTestRequest, TemplateToolsRequest
+from app.schemas.transformations import TransformationChatRequest, TransformationTestRequest, TemplateToolsRequest, MappingDiscoveryRequest
 from app.services import transformations
 from app.services.feedback import submit_feedback
 from app.transformations import local_model
 
 router = APIRouter(prefix='/api/v1/transformations', tags=['Transformations'])
+
+
+@router.post('/mapping-fields')
+@_log_traced('app.api.transformation_handoff.mapping_fields', level=10)
+def mapping_fields(request: MappingDiscoveryRequest, user: UserModel = Depends(get_current_user)):
+    from app.services.mapping_discovery import discover
+    try:
+        return {'success':True, 'data':discover(request)}
+    except (ValueError, TypeError, RecursionError) as exc:
+        raise HTTPException(422, str(exc) if not isinstance(exc,RecursionError) else 'Payload nesting exceeds supported limits.') from exc
 
 
 @router.post('/generate')

@@ -65,29 +65,19 @@ class RequestContext(BaseModel):
         return self
 
 
-class TransformationChatRequest(RequestContext):
+class MappingDiscoveryRequest(RequestContext):
     type: Optional[TransformationType] = None
-    message: str = ""
     direction: Literal['REQUEST', 'RESPONSE'] = Field(
         description="REQUEST or RESPONSE"
     )
     source: TransformationPayload
     target: TransformationPayload
-    validations: list[Dict[str, Any]] = Field(default_factory=list)
-    mappings: Dict[str, str] = Field(default_factory=dict,
-        description='Optional target-to-source overrides. Omit or send an empty value for automatic mapping.')
-    use_learned: bool = False
-    filters: list[Dict[str, Any]] = Field(default_factory=list, max_length=20)
 
     @model_validator(mode='before')
     @classmethod
     def normalize_contract(cls, values):
         if not isinstance(values, dict):return values
         data = dict(values)
-        # Frontends commonly serialize an unselected optional control as null,
-        # an empty string or an empty array. Only empty values mean auto-map.
-        if data.get('mappings') is None or data.get('mappings') == '' or data.get('mappings') == []:
-            data['mappings'] = {}
         formats = None
         if data.get('type') is not None:
             kind = data['type']
@@ -111,6 +101,24 @@ class TransformationChatRequest(RequestContext):
                     raise ValueError(f'{name}.format conflicts with type.')
                 value['format'] = formats[index]
             data[name] = value
+        return data
+
+
+class TransformationChatRequest(MappingDiscoveryRequest):
+    message: str = ""
+    validations: list[Dict[str, Any]] = Field(default_factory=list)
+    mappings: Dict[str, str] = Field(default_factory=dict,
+        description='Optional target-to-source overrides. Omit or send an empty value for automatic mapping.')
+    use_learned: bool = False
+    filters: list[Dict[str, Any]] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode='before')
+    @classmethod
+    def optional_mappings(cls, values):
+        if not isinstance(values,dict):return values
+        data=dict(values)
+        if data.get('mappings') is None or data.get('mappings') == '' or data.get('mappings') == []:
+            data['mappings']={}
         return data
 
 

@@ -1,0 +1,65 @@
+{
+  "info": {
+    "name": "Transformation Agent - Mapping Fields",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/transformation-agent/api/v2"
+    },
+    {
+      "key": "channelName",
+      "value": "REPLACE_CHANNEL_NAME"
+    },
+    {
+      "key": "serviceId",
+      "value": "REPLACE_SERVICE_ID"
+    }
+  ],
+  "item": [
+    {
+      "name": "Discover mapping fields and validations",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-channel-name",
+            "value": "{{channelName}}"
+          },
+          {
+            "key": "x-service-id",
+            "value": "{{serviceId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformations/mapping-fields",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"direction\": \"REQUEST\",\n  \"type\": \"JSONTOJSON\",\n  \"source\": {\n    \"customer\": {\n      \"name\": \"Alice\"\n    },\n    \"amount\": 25\n  },\n  \"target\": {\n    \"fullName\": \"\",\n    \"amount\": 0\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Request succeeded\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json().data;",
+              "pm.test(\"Field trees and validation catalog\", () => { pm.expect(data.sourcePayloadKeys).to.be.an(\"array\"); pm.expect(data.targetPayloadKeys).to.be.an(\"array\"); pm.expect(data.validations).to.be.an(\"array\"); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

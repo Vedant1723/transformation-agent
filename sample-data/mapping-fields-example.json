@@ -1,0 +1,86 @@
+{
+  "request": {
+    "direction": "REQUEST",
+    "type": "JSONTOJSON",
+    "source": {
+      "customer": {
+        "name": "Alice"
+      },
+      "amount": 25
+    },
+    "target": {
+      "fullName": "",
+      "amount": 0
+    }
+  },
+  "response": {
+    "st": true,
+    "msg": "success",
+    "msgId": "SUCCESS",
+    "data": {
+      "sourceFormat": "JSON",
+      "targetFormat": "JSON",
+      "sourcePayloadKeys": [
+        "customer.name",
+        "amount"
+      ],
+      "targetPayloadKeys": [
+        "fullName",
+        "amount"
+      ],
+      "validations": [
+        {
+          "type": "required",
+          "valueType": "none"
+        },
+        {
+          "type": "min",
+          "valueType": "number"
+        },
+        {
+          "type": "max",
+          "valueType": "number"
+        },
+        {
+          "type": "length",
+          "valueType": "nonnegative_integer"
+        },
+        {
+          "type": "min_length",
+          "valueType": "nonnegative_integer"
+        },
+        {
+          "type": "max_length",
+          "valueType": "nonnegative_integer"
+        },
+        {
+          "type": "regex",
+          "valueType": "string"
+        },
+        {
+          "type": "email",
+          "valueType": "none"
+        },
+        {
+          "type": "enum",
+          "valueType": "comma_separated_string"
+        },
+        {
+          "type": "type",
+          "valueType": "string",
+          "options": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        }
+      ],
+      "validationField": "source path",
+      "validationFailureActions": [
+        "stop",
+        "fallback"
+      ],
+      "warnings": []
+    }
+  }
+}
