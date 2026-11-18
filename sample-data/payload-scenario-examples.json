@@ -1,0 +1,148 @@
+[
+  {
+    "request": {
+      "action": "generate_payload",
+      "type": "JSONTOJSON",
+      "direction": "REQUEST",
+      "template": "<#if body.request.status == \"200\">success<#elseif body.request.status == \"400\">invalid<#else>failed</#if>"
+    },
+    "response": {
+      "st": true,
+      "msg": "success",
+      "msgId": "SUCCESS",
+      "data": {
+        "source_format": "JSON",
+        "direction": "REQUEST",
+        "warnings": [
+          "Synthetic input inferred from static references. Review values and run Test; validation rules and dynamic expressions may require edits."
+        ],
+        "inferred_references": [
+          "body.request.status"
+        ],
+        "input_scenarios": [
+          {
+            "name": "If condition: body.request.status == \"200\"",
+            "input_payload": {
+              "inputRequest": {
+                "status": "200"
+              },
+              "inputHeaders": {},
+              "additionalProperties": {}
+            }
+          },
+          {
+            "name": "Else-if condition: body.request.status == \"400\"",
+            "input_payload": {
+              "inputRequest": {
+                "status": "400"
+              },
+              "inputHeaders": {},
+              "additionalProperties": {}
+            }
+          },
+          {
+            "name": "Else branch: All earlier conditions in this chain are false",
+            "input_payload": {
+              "inputRequest": {
+                "status": "DEMO_status"
+              },
+              "inputHeaders": {},
+              "additionalProperties": {}
+            }
+          }
+        ],
+        "input_payload": {
+          "inputRequest": {
+            "status": "DEMO_status"
+          },
+          "inputHeaders": {},
+          "additionalProperties": {}
+        },
+        "verified": false
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "generate_payload",
+      "type": "XMLTOJSON",
+      "direction": "RESPONSE",
+      "xml_root": "COMMAND",
+      "template": "<#if body.TXNSTATUS == \"200\">success<#else>failed</#if>"
+    },
+    "response": {
+      "st": true,
+      "msg": "success",
+      "msgId": "SUCCESS",
+      "data": {
+        "source_format": "XML",
+        "direction": "RESPONSE",
+        "warnings": [
+          "Synthetic input inferred from static references. Review values and run Test; validation rules and dynamic expressions may require edits."
+        ],
+        "inferred_references": [
+          "body.TXNSTATUS"
+        ],
+        "input_scenarios": [
+          {
+            "name": "If condition: body.TXNSTATUS == \"200\"",
+            "input_payload": "<COMMAND>\n  <TXNSTATUS>200</TXNSTATUS>\n</COMMAND>\n"
+          },
+          {
+            "name": "Else branch: All earlier conditions in this chain are false",
+            "input_payload": "<COMMAND>\n  <TXNSTATUS></TXNSTATUS>\n</COMMAND>\n"
+          }
+        ],
+        "input_payload": "<COMMAND>\n  <TXNSTATUS>200</TXNSTATUS>\n</COMMAND>\n",
+        "verified": false
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "generate_payload",
+      "type": "ISOTOXML",
+      "direction": "REQUEST",
+      "template": "<#if body.request[\"39\"] == \"00\">success<#else>failed</#if>"
+    },
+    "response": {
+      "st": true,
+      "msg": "success",
+      "msgId": "SUCCESS",
+      "data": {
+        "source_format": "ISO",
+        "direction": "REQUEST",
+        "warnings": [
+          "Synthetic input inferred from static references. Review values and run Test; validation rules and dynamic expressions may require edits."
+        ],
+        "inferred_references": [
+          "body.request[\"39\"]"
+        ],
+        "input_scenarios": [
+          {
+            "name": "If condition: body.request[\"39\"] == \"00\"",
+            "input_payload": {
+              "inputRequest": "39=00",
+              "inputHeaders": {},
+              "additionalProperties": {}
+            }
+          },
+          {
+            "name": "Else branch: All earlier conditions in this chain are false",
+            "input_payload": {
+              "inputRequest": "39=",
+              "inputHeaders": {},
+              "additionalProperties": {}
+            }
+          }
+        ],
+        "input_payload": {
+          "inputRequest": "39=00",
+          "inputHeaders": {},
+          "additionalProperties": {}
+        },
+        "verified": false
+      }
+    }
+  }
+]

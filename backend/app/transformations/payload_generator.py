@@ -4,6 +4,7 @@ import re
 from lxml import etree
 from app.transformations.template_tools import REFERENCE
 from app.transformations.template_corrections import correct_bare_references
+from app.transformations.payload_scenarios import build_scenarios
 
 
 @_log_traced('app.transformations.payload_generator.generate_payload', level=10)
@@ -138,8 +139,18 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
         return etree.tostring(root,encoding='unicode',pretty_print=True)
     if corrections:
         warnings.append('Bare dollar references were corrected to FreeMarker interpolation. Use corrected_template when testing this payload.')
+    scenarios, coverage = build_scenarios(template, data, headers, props, direction, serialize, loop_paths, sample_hints)
+    labels = {'if':'If condition', 'elseif':'Else-if condition', 'else':'Else branch'}
+    scenarios = [{'name': (labels[s['kind']] + ': ' + s['description']
+                           if s['kind'] in labels else s['description']),
+                  'input_payload':s['input_payload']} for s in scenarios]
+    if coverage['uncovered']:
+        warnings.append(f"{len(coverage['uncovered'])} branches need manual test inputs because their conditions are unsupported or no sample was found.")
+    if coverage['truncated']:
+        warnings.append('Scenario generation limit reached; additional scenarios may need manual test inputs.')
     return {**({'corrected_template':template,'corrections':corrections} if corrections else {}),
             'source_format':source_format,'direction':direction,'warnings':warnings,'inferred_references':refs,
+            'input_scenarios':scenarios,
             'input_payload':({'inputRequest':serialize(data),'inputHeaders':headers,'additionalProperties':props}
                              if direction=='REQUEST' else serialize(data)),
             'verified':False}
