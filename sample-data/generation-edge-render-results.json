@@ -1,0 +1,354 @@
+{
+  "cases": [
+    {
+      "name": "REQUEST JSON typed generated input",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"enabled\": ${body.request.flag?string?boolean?c},\n\"result\": ${body.request.value?number?c}}",
+      "input": {
+        "flag": true,
+        "value": 10
+      },
+      "target_format": "JSON",
+      "expected": {
+        "enabled": true,
+        "result": 10
+      }
+    },
+    {
+      "name": "REQUEST XML typed generated input",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"enabled\": ${body.request.flag?string?boolean?c},\n\"result\": ${body.request.value?number?c}}",
+      "input": "<Source>\n  <flag>true</flag>\n  <value>10</value>\n</Source>\n",
+      "target_format": "JSON",
+      "expected": {
+        "enabled": true,
+        "result": 10
+      }
+    },
+    {
+      "name": "REQUEST ISO typed generated input",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"enabled\": ${body.request[\"48\"]?string?boolean?c},\n\"result\": ${body.request[\"4\"]?number?c}}",
+      "input": {
+        "4": "10",
+        "48": "true"
+      },
+      "target_format": "JSON",
+      "expected": {
+        "enabled": true,
+        "result": 10
+      }
+    },
+    {
+      "name": "REQUEST JSON numeric bound and escaping",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.amount)?? && body.request.amount?string?matches(\"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?\") && (body.request.amount?number gte 100000000000000000000))>${(\"\\\"A & <B> \\\\\\\"quoted\\\\\\\" $\" + \"{literal} caf\u00e9\\\"\")}<#else>${\"\\\"LOW\\\"\"}</#if>}",
+      "input": {
+        "amount": 1e+21
+      },
+      "target_format": "JSON",
+      "expected": {
+        "message": "A & <B> \"quoted\" ${literal} caf\u00e9"
+      }
+    },
+    {
+      "name": "REQUEST XML numeric bound and escaping",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.amount)?? && body.request.amount?string?matches(\"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?\") && (body.request.amount?number gte 100000000000000000000))>${(\"A & <B> \\\"quoted\\\" $\" + \"{literal} caf\u00e9\")?xml}<#else>${\"LOW\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "amount": 1e+21
+      },
+      "target_format": "XML",
+      "expected": "A & <B> \"quoted\" ${literal} caf\u00e9"
+    },
+    {
+      "name": "REQUEST ISO numeric bound and escaping",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.amount)?? && body.request.amount?string?matches(\"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?\") && (body.request.amount?number gte 100000000000000000000))>${(\"A & <B> \\\"quoted\\\" $\" + \"{literal} caf\u00e9\")}<#else>${\"LOW\"}</#if>",
+      "input": {
+        "amount": 1e+21
+      },
+      "target_format": "ISO",
+      "expected": "A & <B> \"quoted\" ${literal} caf\u00e9"
+    },
+    {
+      "name": "REQUEST list []",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"items\": [<#list (body.request.items)![] as row0>\n{\"message\": <#if ((row0.status)?? && (row0.status?string == \"200\"))>${\"\\\"OK\\\"\"}<#else>${\"\\\"FAILED\\\"\"}</#if>}<#sep>,</#sep></#list>]}",
+      "input": {
+        "items": []
+      },
+      "target_format": "JSON",
+      "expected": {
+        "items": []
+      }
+    },
+    {
+      "name": "REQUEST list ['200']",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"items\": [<#list (body.request.items)![] as row0>\n{\"message\": <#if ((row0.status)?? && (row0.status?string == \"200\"))>${\"\\\"OK\\\"\"}<#else>${\"\\\"FAILED\\\"\"}</#if>}<#sep>,</#sep></#list>]}",
+      "input": {
+        "items": [
+          {
+            "status": "200"
+          }
+        ]
+      },
+      "target_format": "JSON",
+      "expected": {
+        "items": [
+          {
+            "message": "OK"
+          }
+        ]
+      }
+    },
+    {
+      "name": "REQUEST list ['200', '500']",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"items\": [<#list (body.request.items)![] as row0>\n{\"message\": <#if ((row0.status)?? && (row0.status?string == \"200\"))>${\"\\\"OK\\\"\"}<#else>${\"\\\"FAILED\\\"\"}</#if>}<#sep>,</#sep></#list>]}",
+      "input": {
+        "items": [
+          {
+            "status": "200"
+          },
+          {
+            "status": "500"
+          }
+        ]
+      },
+      "target_format": "JSON",
+      "expected": {
+        "items": [
+          {
+            "message": "OK"
+          },
+          {
+            "message": "FAILED"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RESPONSE JSON typed generated input",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"enabled\": ${body.flag?string?boolean?c},\n\"result\": ${body.value?number?c}}",
+      "input": {
+        "flag": true,
+        "value": 10
+      },
+      "target_format": "JSON",
+      "expected": {
+        "enabled": true,
+        "result": 10
+      }
+    },
+    {
+      "name": "RESPONSE XML typed generated input",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n{\"enabled\": ${body.flag?string?boolean?c},\n\"result\": ${body.value?number?c}}",
+      "input": "<Source>\n  <flag>true</flag>\n  <value>10</value>\n</Source>\n",
+      "target_format": "JSON",
+      "expected": {
+        "enabled": true,
+        "result": 10
+      }
+    },
+    {
+      "name": "RESPONSE ISO typed generated input",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"enabled\": ${body[\"48\"]?string?boolean?c},\n\"result\": ${body[\"4\"]?number?c}}",
+      "input": {
+        "4": "10",
+        "48": "true"
+      },
+      "target_format": "JSON",
+      "expected": {
+        "enabled": true,
+        "result": 10
+      }
+    },
+    {
+      "name": "RESPONSE JSON numeric bound and escaping",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body.amount)?? && body.amount?string?matches(\"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?\") && (body.amount?number gte 100000000000000000000))>${(\"\\\"A & <B> \\\\\\\"quoted\\\\\\\" $\" + \"{literal} caf\u00e9\\\"\")}<#else>${\"\\\"LOW\\\"\"}</#if>}",
+      "input": {
+        "amount": 1e+21
+      },
+      "target_format": "JSON",
+      "expected": {
+        "message": "A & <B> \"quoted\" ${literal} caf\u00e9"
+      }
+    },
+    {
+      "name": "RESPONSE XML numeric bound and escaping",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body.amount)?? && body.amount?string?matches(\"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?\") && (body.amount?number gte 100000000000000000000))>${(\"A & <B> \\\"quoted\\\" $\" + \"{literal} caf\u00e9\")?xml}<#else>${\"LOW\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "amount": 1e+21
+      },
+      "target_format": "XML",
+      "expected": "A & <B> \"quoted\" ${literal} caf\u00e9"
+    },
+    {
+      "name": "RESPONSE ISO numeric bound and escaping",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body.amount)?? && body.amount?string?matches(\"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?\") && (body.amount?number gte 100000000000000000000))>${(\"A & <B> \\\"quoted\\\" $\" + \"{literal} caf\u00e9\")}<#else>${\"LOW\"}</#if>",
+      "input": {
+        "amount": 1e+21
+      },
+      "target_format": "ISO",
+      "expected": "A & <B> \"quoted\" ${literal} caf\u00e9"
+    },
+    {
+      "name": "RESPONSE list []",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"items\": [<#list (body.items)![] as row0>\n{\"message\": <#if ((row0.status)?? && (row0.status?string == \"200\"))>${\"\\\"OK\\\"\"}<#else>${\"\\\"FAILED\\\"\"}</#if>}<#sep>,</#sep></#list>]}",
+      "input": {
+        "items": []
+      },
+      "target_format": "JSON",
+      "expected": {
+        "items": []
+      }
+    },
+    {
+      "name": "RESPONSE list ['200']",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"items\": [<#list (body.items)![] as row0>\n{\"message\": <#if ((row0.status)?? && (row0.status?string == \"200\"))>${\"\\\"OK\\\"\"}<#else>${\"\\\"FAILED\\\"\"}</#if>}<#sep>,</#sep></#list>]}",
+      "input": {
+        "items": [
+          {
+            "status": "200"
+          }
+        ]
+      },
+      "target_format": "JSON",
+      "expected": {
+        "items": [
+          {
+            "message": "OK"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RESPONSE list ['200', '500']",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"items\": [<#list (body.items)![] as row0>\n{\"message\": <#if ((row0.status)?? && (row0.status?string == \"200\"))>${\"\\\"OK\\\"\"}<#else>${\"\\\"FAILED\\\"\"}</#if>}<#sep>,</#sep></#list>]}",
+      "input": {
+        "items": [
+          {
+            "status": "200"
+          },
+          {
+            "status": "500"
+          }
+        ]
+      },
+      "target_format": "JSON",
+      "expected": {
+        "items": [
+          {
+            "message": "OK"
+          },
+          {
+            "message": "FAILED"
+          }
+        ]
+      }
+    }
+  ],
+  "results": [
+    {
+      "name": "REQUEST JSON typed generated input",
+      "output": "\n{\"enabled\": true,\n\"result\": 10}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XML typed generated input",
+      "output": "\n{\"enabled\": true,\n\"result\": 10}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISO typed generated input",
+      "output": "\n{\"enabled\": true,\n\"result\": 10}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSON numeric bound and escaping",
+      "output": "\n{\"message\": \"A & <B> \\\"quoted\\\" ${literal} caf\u00e9\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XML numeric bound and escaping",
+      "output": "\n<Result>\n  <message>A &amp; &lt;B&gt; &quot;quoted&quot; ${literal} caf\u00e9</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISO numeric bound and escaping",
+      "output": "\n48=A & <B> \"quoted\" ${literal} caf\u00e9",
+      "passed": true
+    },
+    {
+      "name": "REQUEST list []",
+      "output": "\n{\"items\": []}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST list ['200']",
+      "output": "\n{\"items\": [\n{\"message\": \"OK\"}]}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST list ['200', '500']",
+      "output": "\n{\"items\": [\n{\"message\": \"OK\"},\n{\"message\": \"FAILED\"}]}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSON typed generated input",
+      "output": "\n{\"enabled\": true,\n\"result\": 10}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XML typed generated input",
+      "output": "\n{\"enabled\": true,\n\"result\": 10}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISO typed generated input",
+      "output": "\n{\"enabled\": true,\n\"result\": 10}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSON numeric bound and escaping",
+      "output": "\n{\"message\": \"A & <B> \\\"quoted\\\" ${literal} caf\u00e9\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XML numeric bound and escaping",
+      "output": "\n<Result>\n  <message>A &amp; &lt;B&gt; &quot;quoted&quot; ${literal} caf\u00e9</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISO numeric bound and escaping",
+      "output": "\n48=A & <B> \"quoted\" ${literal} caf\u00e9",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE list []",
+      "output": "\n{\"items\": []}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE list ['200']",
+      "output": "\n{\"items\": [\n{\"message\": \"OK\"}]}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE list ['200', '500']",
+      "output": "\n{\"items\": [\n{\"message\": \"OK\"},\n{\"message\": \"FAILED\"}]}",
+      "passed": true
+    }
+  ]
+}

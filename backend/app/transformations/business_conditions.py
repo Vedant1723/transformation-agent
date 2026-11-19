@@ -1,5 +1,6 @@
 """Validate and compile bounded business conditions without accepting raw FTL."""
 import math
+from decimal import Decimal
 
 OPERATORS={'eq','ne','gt','gte','lt','lte','in','not_in','exists','not_exists'}
 
@@ -71,7 +72,8 @@ def render(rule,expression,constant,literal,source_format,source_paths):
         elif type(value) in (int,float):
             exists+=f' && {left}?matches("[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?")'
             compare={'eq':'==','ne':'!=','gt':'gt','gte':'gte','lt':'lt','lte':'lte'}[op]
-            test=f'{expr}?number {compare} {value}'
+            number=format(Decimal(str(value)),'f')
+            test=f'{expr}?number {compare} {number}'
         else:
             test=left+(' == ' if op=='eq' else ' != ')+literal(text(value))
         return '('+exists+' && ('+test+'))'

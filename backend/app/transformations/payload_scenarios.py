@@ -10,6 +10,8 @@ MAX_SCENARIOS = 20
 MAX_SEARCH = 512
 TAG = re.compile(r'''</?#(?:if|elseif|else|list)\b(?:[^>"']|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')*>''')
 TOKEN = re.compile(r'''\s*(?:(?P<ref>body(?:(?:\.[A-Za-z_]\w*)|(?:\[(?:\d+|"[^"\n]*"|'[^'\n]*')\]))+)|(?P<string>"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(?P<number>-?\d+(?:\.\d+)?)|(?P<op>\?has_content|\?number|\?string|\?trim|\?length|\?size|\?\?|&&|\|\||==|!=|>=|<=|[()!<>])|(?P<word>true\b|false\b|gte\b|lte\b|gt\b|lt\b|and\b|or\b))''')
+TOKEN = re.compile(TOKEN.pattern.replace(r'\?has_content',r'\?matches|\?has_content'))
+NUMERIC_PATTERN = r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?'
 
 
 class Condition:
@@ -46,25 +48,39 @@ class Condition:
         elif value in ('true','false'):node=('value',value=='true')
         else:raise ValueError('Unsupported condition token')
         while self.peek() and self.peek().startswith('?'):
-            op=self.peek();self.index+=1;node=(op,node)
+            op=self.peek();self.index+=1
+            if op=='?matches':
+                if self.peek()!='(':raise ValueError('Unsupported matches expression')
+                self.index+=1
+                if self.index>=len(self.tokens) or self.tokens[self.index][0]!='string':raise ValueError('Regex must be literal')
+                pattern=ast.literal_eval(self.tokens[self.index][1]);self.index+=1
+                if pattern!=NUMERIC_PATTERN or self.peek()!=')':raise ValueError('Only compiler numeric regex guards are supported')
+                self.index+=1;node=(op,node,pattern)
+            else:node=(op,node)
         precedences={'||':1,'or':1,'&&':2,'and':2,'==':3,'!=':3,'>':3,'<':3,'>=':3,'<=':3,'gt':3,'lt':3,'gte':3,'lte':3}
         while self.peek() in precedences and precedences[self.peek()]>=minimum:
             op=self.peek();self.index+=1
             node=(op,node,self.parse(depth+1,precedences[op]+1))
         return node
 
-    def evaluate(self, getter):
+    def evaluate(self, getter, source_format='JSON'):
         def visit(node):
             op=node[0]
             if op=='ref':return getter(node[1])
             if op=='value':return node[1]
             left=visit(node[1])
+            xml_node=(source_format=='XML' and node[1][0]=='ref' and
+                      not node[1][1].startswith(('body.headers.','body.header.','body.addProps.','body.headers[','body.header[','body.addProps[')))
+            if xml_node and op in ('?size','?has_content'):
+                count=0 if left is MISSING or left is None else len(left) if isinstance(left,list) else 1
+                return count if op=='?size' else count>0
             if op=='??':return left is not MISSING and left is not None
             if op=='?has_content':return left is not MISSING and left is not None and left!='' and left!=[] and left!={}
             if op=='not':return not boolean(left)
             if op in ('&&','and'):return boolean(left) and boolean(visit(node[2]))
             if op in ('||','or'):return boolean(left) or boolean(visit(node[2]))
             if left is MISSING:raise ValueError('Missing field')
+            if op=='?matches':return re.fullmatch(node[2],str(left)) is not None
             if op=='?number':return float(left)
             if op=='?string':return str(left).lower() if isinstance(left,bool) else str(left)
             if op=='?trim':return str(left).strip()
@@ -131,7 +147,7 @@ def write(state,reference,value,direction):
     else:raise ValueError('Conflicting scenario path')
 
 
-def build_scenarios(template, data, headers, props, direction, serialize, loop_paths, regex_hints=None):
+def build_scenarios(template, data, headers, props, direction, serialize, loop_paths, regex_hints=None, source_format='JSON'):
     base={'payload':data,'headers':headers,'props':props}
     scenarios=[];uncovered=[];stack=[];targets=[];loop_depth=0;truncated=False
     clean=re.sub(r'<#--[\s\S]*?-->|<#noparse\b[^>]*>[\s\S]*?</#noparse>', '', template)
@@ -199,7 +215,7 @@ def build_scenarios(template, data, headers, props, direction, serialize, loop_p
             state=copy.deepcopy(base)
             try:
                 for ref,value in zip(refs,values):write(state,ref,value,direction)
-                if not all(c.evaluate(lambda ref:read(state,ref,direction))==expected for c,expected in constraints):continue
+                if not all(c.evaluate(lambda ref:read(state,ref,direction),source_format)==expected for c,expected in constraints):continue
                 found=emit(state,kind,line,description)
                 if found:break
             except (ValueError,TypeError,KeyError,IndexError,OverflowError):continue

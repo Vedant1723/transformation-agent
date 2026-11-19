@@ -3,6 +3,7 @@ from app.core.observability import traced as _log_traced, exception_event as _lo
 import json
 import math
 import re
+from decimal import Decimal
 from collections import Counter
 
 from lxml import etree
@@ -16,15 +17,19 @@ PREAMBLE = '<#setting number_format="computer">\n<#setting boolean_format="c">\n
 
 @_log_traced('app.transformations.workbench.literal', level=10)
 def literal(value):
-    # FreeMarker string literals interpolate ${...}; escape user literals.
-    return json.dumps(str(value), ensure_ascii=False).replace('${', r'\${').replace('#{', r'\#{')
+    # FreeMarker does not accept a backslash before $. Split interpolation
+    # markers across string literals so partner text remains literal data.
+    parts=re.split(r'(?<=[$#])(?=\{)',str(value))
+    encoded=[json.dumps(part,ensure_ascii=False) for part in parts]
+    return encoded[0] if len(encoded)==1 else '('+' + '.join(encoded)+')'
 
 
 @_log_traced('app.transformations.workbench.xml_root', level=10)
 def xml_root(payload):
     if not isinstance(payload, str) or '<!DOCTYPE' in payload.upper():
         raise ValueError('XML must be text without a DOCTYPE.')
-    return etree.fromstring(payload.encode(), etree.XMLParser(resolve_entities=False, no_network=True))
+    return etree.fromstring(payload.encode(), etree.XMLParser(resolve_entities=False, no_network=True,
+                                                           remove_comments=True, remove_pis=True))
 
 
 @_log_traced('app.transformations.workbench.normalize', level=10)
@@ -119,7 +124,7 @@ def validation_blocks(rules, paths, source_format='JSON', conditions=None, direc
                 raise ValueError('Length must be a nonnegative integer.')
             left = text + '?length' if 'length' in kind else expr + '?number'
             op = '!=' if kind == 'length' else 'lt' if kind.startswith('min') else 'gt'
-            condition = f'({left} {op} {number})'
+            condition = f'({left} {op} {format(Decimal(str(number)), "f")})'
             if 'length' not in kind:
                 condition = f'!({text}?matches("[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?")) || ({condition})'
         elif kind in ('regex', 'email'):
@@ -194,8 +199,16 @@ def generate(request, learned=None):
                 raise ValueError('Source already contains header. Move metadata into headers to avoid collisions.')
             source = {**source, 'headers': request.headers, 'header': request.headers}
     target = normalize(request.target.payload, request.target.format)
-    sources = {path_name(p): (p, v) for p, v in leaves(source)}
-    targets = {path_name(p): (p, v) for p, v in leaves(target)}
+    def indexed_fields(payload,side):
+        indexed={}
+        for path,value in leaves(payload):
+            name=path_name(path)
+            if name in indexed:
+                raise ValueError(f'{side} has an ambiguous dotted field path: {name}. Rename conflicting keys before generating.')
+            indexed[name]=(path,value)
+        return indexed
+    sources = indexed_fields(source,'Source')
+    targets = indexed_fields(target,'Target')
     source_lists = collections(source, request.source.format.upper() == 'XML')
     loops, loop_warnings = plan_loops(target, source_lists, request.target.format.upper() == 'XML')
     for plan in loops.values():

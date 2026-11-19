@@ -1,6 +1,7 @@
 """Bounded static sample inference; never claims a sample satisfies business rules."""
 from app.core.observability import traced as _log_traced, exception_event as _log_exception
 import re
+import copy
 from lxml import etree
 from app.transformations.template_tools import REFERENCE
 from app.transformations.template_corrections import correct_bare_references
@@ -100,8 +101,15 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
             if data is None:data=[] if isinstance(path[0],int) else {}
             destination=data
         name=str(path[-1]).lower()
-        numeric=bool(re.search(re.escape(reference)+r'\?(?:number|c)\b',expanded)) or name in ('amount','quantity','price','total','count','unitprice')
-        value=10 if numeric else True if name in ('enabled','active','isactive') else 'DEMO_'+str(path[-1])
+        chains=re.findall(re.escape(reference)+r'((?:\?[A-Za-z_]\w*)+)',expanded)
+        boolean=any(re.search(r'\?boolean\b',chain) for chain in chains)
+        numeric=any(re.search(r'\?number\b',chain) for chain in chains)
+        if boolean and numeric:
+            raise ValueError(f'{reference} is used as both boolean and number; provide a representative input manually.')
+        boolean=boolean or (not numeric and name in ('enabled','active','isactive'))
+        numeric=numeric or (not boolean and name in ('amount','quantity','price','total','count','unitprice'))
+        numeric=numeric or (not boolean and any(re.search(r'\?c\b',chain) for chain in chains))
+        value=True if boolean else 10 if numeric else 'DEMO_'+str(path[-1])
         # Prefer an explicit string equality example when unambiguous. This is
         # a sample hint, not a solver for arbitrary FreeMarker conditions.
         equalities=set(re.findall(re.escape(reference)+r'''\s*==\s*["']([^"'\r\n]*)["']''',expanded))
@@ -117,7 +125,7 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
             if not isinstance(payload,dict):raise ValueError('Textual ISO requires quoted numeric field keys, not array indices.')
             if any(not str(k).isdigit() or not 0<=int(k)<=128 or isinstance(v,(dict,list)) for k,v in payload.items()):
                 raise ValueError('Textual ISO needs scalar numeric field keys (0–128); this template is not compatible.')
-            return '\n'.join(f'{k}={v}' for k,v in payload.items())
+            return '\n'.join(f'{k}={str(v).lower() if isinstance(v,bool) else v}' for k,v in payload.items())
         if not re.fullmatch(r'[A-Za-z_][\w.-]*',xml_root):raise ValueError('Use an XML root name without a namespace prefix.')
         root=etree.Element(xml_root)
         if not isinstance(payload,dict):raise ValueError('XML requires named elements, not a top-level array.')
@@ -139,18 +147,29 @@ def generate_payload(template, source_format='JSON', direction='REQUEST', xml_ro
         return etree.tostring(root,encoding='unicode',pretty_print=True)
     if corrections:
         warnings.append('Bare dollar references were corrected to FreeMarker interpolation. Use corrected_template when testing this payload.')
-    scenarios, coverage = build_scenarios(template, data, headers, props, direction, serialize, loop_paths, sample_hints)
-    labels = {'if':'If condition', 'elseif':'Else-if condition', 'else':'Else branch'}
-    scenarios = [{'name': (labels[s['kind']] + ': ' + s['description']
-                           if s['kind'] in labels else s['description']),
-                  'input_payload':s['input_payload']} for s in scenarios]
-    if coverage['uncovered']:
-        warnings.append(f"{len(coverage['uncovered'])} branches need manual test inputs because their conditions are unsupported or no sample was found.")
-    if coverage['truncated']:
-        warnings.append('Scenario generation limit reached; additional scenarios may need manual test inputs.')
+    # The default is the primary result. Finish it before optional scenario work
+    # and give scenario generation isolated copies of every mutable input.
+    default_payload = copy.deepcopy(
+        {'inputRequest':serialize(data),'inputHeaders':headers,'additionalProperties':props}
+        if direction=='REQUEST' else serialize(data))
+    scenarios = []
+    try:
+        generated, coverage = build_scenarios(template, copy.deepcopy(data), copy.deepcopy(headers),
+            copy.deepcopy(props), direction, serialize, list(loop_paths), dict(sample_hints), source_format)
+        labels = {'if':'If condition', 'elseif':'Else-if condition', 'else':'Else branch'}
+        scenarios = [{'name': (labels[s['kind']] + ': ' + s['description']
+                               if s['kind'] in labels else s['description']),
+                      'input_payload':s['input_payload']} for s in generated]
+        if coverage['uncovered']:
+            warnings.append(f"{len(coverage['uncovered'])} branches need manual test inputs because their conditions are unsupported or no sample was found.")
+        if coverage['truncated']:
+            warnings.append('Scenario generation limit reached; additional scenarios may need manual test inputs.')
+    except Exception as exc:
+        _log_exception('app.transformations.payload_generator.optional_scenarios', exc, handled=True)
+        scenarios = []
+        warnings.append('Additional scenario inputs could not be generated. The default input_payload is available and unchanged.')
     return {**({'corrected_template':template,'corrections':corrections} if corrections else {}),
             'source_format':source_format,'direction':direction,'warnings':warnings,'inferred_references':refs,
             'input_scenarios':scenarios,
-            'input_payload':({'inputRequest':serialize(data),'inputHeaders':headers,'additionalProperties':props}
-                             if direction=='REQUEST' else serialize(data)),
+            'input_payload':default_payload,
             'verified':False}
