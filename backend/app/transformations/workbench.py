@@ -221,7 +221,17 @@ def generate(request, learned=None):
     if set(overrides) - set(targets):
         raise ValueError('A mapping refers to a target field that no longer exists. Regenerate mappings.')
     mapped, rows, warnings, computed = {}, [], list(loop_warnings), {}
+    from app.transformations.business_conditions import prepare as prepare_conditions, render as render_conditions
+    business_rules = prepare_conditions(getattr(request,'conditions',[]), sources, targets, request.target.format.upper())
+    for target_path, rule in business_rules.items():
+        for branch in rule['branches']:
+            source_owner=owner(sources[branch['field']][0])
+            if source_owner is not None and source_owner!=target_owner(target_path):
+                raise ValueError('Collection conditions must reference the corresponding target collection.')
     for name, (path, value) in targets.items():
+        if path in business_rules:
+            rows.append({'target_field':name,'source_field':'','confidence':1.0,'reason':'Explicit business conditions'})
+            continue
         chosen = overrides.get(name)
         confidence, reason = 1.0, 'Explicit mapping'
         if chosen is None:
@@ -309,6 +319,12 @@ def generate(request, learned=None):
 
     def conditional(path, encode, constant, sample):
         """Render a scalar with inline IF/ELSEIF/default, preserving JSON/XML syntax."""
+        if path in business_rules:
+            def branch_constant(value):
+                if request.target.format.upper()=='JSON':
+                    return '${' + literal(json.dumps(value,ensure_ascii=False)) + '}'
+                return constant('' if value is None else str(value).lower() if isinstance(value,bool) else value)
+            return render_conditions(business_rules[path],source_expression,branch_constant,literal,request.source.format.upper(),paths)
         original = encode(source_expression(mapped[path]))
         conditions = []
         blocks(rules, conditions)
@@ -372,7 +388,7 @@ def generate(request, learned=None):
                 active.pop()
                 return '[' + begin + content + '<#sep>,</#sep></#list>]'
             return '[' + ','.join(render_json(v, path + (i,)) for i, v in enumerate(value)) + ']'
-        if path not in mapped:
+        if path not in mapped and path not in business_rules:
             # Constants are emitted via a literal to avoid template injection.
             return '${' + literal(json.dumps(value, ensure_ascii=False)) + '}'
         def constant(v):
@@ -418,7 +434,7 @@ def generate(request, learned=None):
                 token = f'{marker}_VALUE_{len(placeholders)}'
                 encode = lambda expr: '${' + expr + '?string?xml}'
                 constant = lambda value: '' if value == '' else '${' + literal(value) + '?xml}'
-                placeholders[token] = conditional(path, encode, constant, node.text or '') if path in mapped else constant(node.text or '')
+                placeholders[token] = conditional(path, encode, constant, node.text or '') if path in mapped or path in business_rules else constant(node.text or '')
                 node.text = token
             if plan:
                 active.pop()
@@ -433,7 +449,7 @@ def generate(request, learned=None):
     elif request.target.format.upper() == 'ISO':
         encode = lambda expr: '${' + expr + '?string}'
         constant = lambda value: '${' + literal(value) + '}'
-        template = '\n'.join(str(key) + '=' + (conditional((key,), encode, constant, value) if (key,) in mapped else constant(value)) for key, value in target.items())
+        template = '\n'.join(str(key) + '=' + (conditional((key,), encode, constant, value) if (key,) in mapped or (key,) in business_rules else constant(value)) for key, value in target.items())
         warnings.append('ISO output is a field-number=value demo representation, not packed ISO 8583 wire bytes.')
     else:
         template = render_json(target)
@@ -444,7 +460,7 @@ def generate(request, learned=None):
         # Accept raw demo samples as well as the real gateway request envelope.
         preamble += setup(request.source.format.upper() == 'XML')
     return {'template': preamble + guards + '\n' + template, 'mappings': rows,
-            'validations': rules, 'filters': request.filters, 'source_fields': [n for n,pair in sources.items() if not any(isinstance(p,int) and p>0 for p in pair[0])], 'target_fields': list(targets),
+            'validations': rules, 'conditions':getattr(request,'conditions',[]), 'filters': request.filters, 'source_fields': [n for n,pair in sources.items() if not any(isinstance(p,int) and p>0 for p in pair[0])], 'target_fields': list(targets),
             'source_format': request.source.format, 'target_format': request.target.format,
             'direction': request.direction, 'warnings': warnings,
             'collections': [{'target':path_name(path), 'source':path_name(plan['source']), 'variable':plan['variable']} for path,plan in loops.items()],

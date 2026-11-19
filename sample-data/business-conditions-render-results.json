@@ -1,0 +1,781 @@
+{
+  "engine": "Local FreeMarker Java runtime; not the organisation Sculpt service",
+  "cases": [
+    {
+      "name": "REQUEST JSONTOJSON 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "status": "200"
+      },
+      "target_format": "JSON",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST JSONTOJSON 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "status": "400"
+      },
+      "target_format": "JSON",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST JSONTOJSON 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "status": "500"
+      },
+      "target_format": "JSON",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST JSONTOXML 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "status": "200"
+      },
+      "target_format": "XML",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST JSONTOXML 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "status": "400"
+      },
+      "target_format": "XML",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST JSONTOXML 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "status": "500"
+      },
+      "target_format": "XML",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST JSONTOISO 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"Success\"}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "status": "200"
+      },
+      "target_format": "ISO",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST JSONTOISO 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"Success\"}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "status": "400"
+      },
+      "target_format": "ISO",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST JSONTOISO 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.status)?? && (body.request.status?string == \"200\"))>${\"Success\"}<#elseif ((body.request.status)?? && (body.request.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "status": "500"
+      },
+      "target_format": "ISO",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST XMLTOJSON 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": "<Reply><status>200</status></Reply>",
+      "target_format": "JSON",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST XMLTOJSON 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": "<Reply><status>400</status></Reply>",
+      "target_format": "JSON",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST XMLTOJSON 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": "<Reply><status>500</status></Reply>",
+      "target_format": "JSON",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST XMLTOXML 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": "<Reply><status>200</status></Reply>",
+      "target_format": "XML",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST XMLTOXML 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": "<Reply><status>400</status></Reply>",
+      "target_format": "XML",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST XMLTOXML 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": "<Reply><status>500</status></Reply>",
+      "target_format": "XML",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST XMLTOISO 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"Success\"}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": "<Reply><status>200</status></Reply>",
+      "target_format": "ISO",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST XMLTOISO 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"Success\"}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": "<Reply><status>400</status></Reply>",
+      "target_format": "ISO",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST XMLTOISO 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n<#-- control-room request context -->\n<#if !(body.request)?has_content><#assign body = {\"request\": body}></#if>\n<#assign body = {\"request\": body.request, \"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"200\"))>${\"Success\"}<#elseif ((body.request.status)?has_content && (body.request.status)?size == 1 && (body.request.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": "<Reply><status>500</status></Reply>",
+      "target_format": "ISO",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST ISOTOJSON 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "39": "200"
+      },
+      "target_format": "JSON",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST ISOTOJSON 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "39": "400"
+      },
+      "target_format": "JSON",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST ISOTOJSON 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n{\"message\": <#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "39": "500"
+      },
+      "target_format": "JSON",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST ISOTOXML 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "39": "200"
+      },
+      "target_format": "XML",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST ISOTOXML 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "39": "400"
+      },
+      "target_format": "XML",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST ISOTOXML 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n<Result>\n  <message><#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "39": "500"
+      },
+      "target_format": "XML",
+      "expected": "Failed"
+    },
+    {
+      "name": "REQUEST ISOTOISO 200",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"Success\"}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "39": "200"
+      },
+      "target_format": "ISO",
+      "expected": "Success"
+    },
+    {
+      "name": "REQUEST ISOTOISO 400",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"Success\"}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "39": "400"
+      },
+      "target_format": "ISO",
+      "expected": "Invalid"
+    },
+    {
+      "name": "REQUEST ISOTOISO 500",
+      "direction": "REQUEST",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n<#-- control-room request context -->\n<#if !(body.request)?? || !body.request?is_hash><#assign body = body + {\"request\": body}></#if>\n<#assign body = body + {\"addProps\": additionalProperties!(body.addProps!{}), \"headers\": headers!(body.headers!(body.header!{})), \"header\": headers!(body.headers!(body.header!{}))}>\n\n48=<#if ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"200\"))>${\"Success\"}<#elseif ((body.request[\"39\"])?? && (body.request[\"39\"]?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "39": "500"
+      },
+      "target_format": "ISO",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE JSONTOJSON 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body.status)?? && (body.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "status": "200"
+      },
+      "target_format": "JSON",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE JSONTOJSON 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body.status)?? && (body.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "status": "400"
+      },
+      "target_format": "JSON",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE JSONTOJSON 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body.status)?? && (body.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "status": "500"
+      },
+      "target_format": "JSON",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE JSONTOXML 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body.status)?? && (body.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "status": "200"
+      },
+      "target_format": "XML",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE JSONTOXML 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body.status)?? && (body.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "status": "400"
+      },
+      "target_format": "XML",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE JSONTOXML 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body.status)?? && (body.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "status": "500"
+      },
+      "target_format": "XML",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE JSONTOISO 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body.status)?? && (body.status?string == \"200\"))>${\"Success\"}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "status": "200"
+      },
+      "target_format": "ISO",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE JSONTOISO 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body.status)?? && (body.status?string == \"200\"))>${\"Success\"}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "status": "400"
+      },
+      "target_format": "ISO",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE JSONTOISO 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body.status)?? && (body.status?string == \"200\"))>${\"Success\"}<#elseif ((body.status)?? && (body.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "status": "500"
+      },
+      "target_format": "ISO",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE XMLTOJSON 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n{\"message\": <#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": "<Reply><status>200</status></Reply>",
+      "target_format": "JSON",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE XMLTOJSON 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n{\"message\": <#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": "<Reply><status>400</status></Reply>",
+      "target_format": "JSON",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE XMLTOJSON 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n{\"message\": <#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": "<Reply><status>500</status></Reply>",
+      "target_format": "JSON",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE XMLTOXML 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n<Result>\n  <message><#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": "<Reply><status>200</status></Reply>",
+      "target_format": "XML",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE XMLTOXML 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n<Result>\n  <message><#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": "<Reply><status>400</status></Reply>",
+      "target_format": "XML",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE XMLTOXML 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n<Result>\n  <message><#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"Success\"?xml}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": "<Reply><status>500</status></Reply>",
+      "target_format": "XML",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE XMLTOISO 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n48=<#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"Success\"}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": "<Reply><status>200</status></Reply>",
+      "target_format": "ISO",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE XMLTOISO 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n48=<#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"Success\"}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": "<Reply><status>400</status></Reply>",
+      "target_format": "ISO",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE XMLTOISO 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = xml['child::node()']>\n\n48=<#if ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"200\"))>${\"Success\"}<#elseif ((body.status)?has_content && (body.status)?size == 1 && (body.status?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": "<Reply><status>500</status></Reply>",
+      "target_format": "ISO",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE ISOTOJSON 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "39": "200"
+      },
+      "target_format": "JSON",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE ISOTOJSON 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "39": "400"
+      },
+      "target_format": "JSON",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE ISOTOJSON 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n{\"message\": <#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"\\\"Success\\\"\"}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"\\\"Invalid\\\"\"}<#else>${\"\\\"Failed\\\"\"}</#if>}",
+      "input": {
+        "39": "500"
+      },
+      "target_format": "JSON",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE ISOTOXML 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"Success\"?xml}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "39": "200"
+      },
+      "target_format": "XML",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE ISOTOXML 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"Success\"?xml}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "39": "400"
+      },
+      "target_format": "XML",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE ISOTOXML 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n<Result>\n  <message><#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"Success\"?xml}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"Invalid\"?xml}<#else>${\"Failed\"?xml}</#if></message>\n</Result>\n",
+      "input": {
+        "39": "500"
+      },
+      "target_format": "XML",
+      "expected": "Failed"
+    },
+    {
+      "name": "RESPONSE ISOTOISO 200",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"Success\"}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "39": "200"
+      },
+      "target_format": "ISO",
+      "expected": "Success"
+    },
+    {
+      "name": "RESPONSE ISOTOISO 400",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"Success\"}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "39": "400"
+      },
+      "target_format": "ISO",
+      "expected": "Invalid"
+    },
+    {
+      "name": "RESPONSE ISOTOISO 500",
+      "direction": "RESPONSE",
+      "template": "<#setting number_format=\"computer\">\n<#setting boolean_format=\"c\">\n<#assign body = JsonUtils.getJsonAsMap(input)>\n\n48=<#if ((body[\"39\"])?? && (body[\"39\"]?string == \"200\"))>${\"Success\"}<#elseif ((body[\"39\"])?? && (body[\"39\"]?string == \"400\"))>${\"Invalid\"}<#else>${\"Failed\"}</#if>",
+      "input": {
+        "39": "500"
+      },
+      "target_format": "ISO",
+      "expected": "Failed"
+    }
+  ],
+  "results": [
+    {
+      "name": "REQUEST JSONTOJSON 200",
+      "output": "\n{\"message\": \"Success\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOJSON 400",
+      "output": "\n{\"message\": \"Invalid\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOJSON 500",
+      "output": "\n{\"message\": \"Failed\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOXML 200",
+      "output": "\n<Result>\n  <message>Success</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOXML 400",
+      "output": "\n<Result>\n  <message>Invalid</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOXML 500",
+      "output": "\n<Result>\n  <message>Failed</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOISO 200",
+      "output": "\n48=Success",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOISO 400",
+      "output": "\n48=Invalid",
+      "passed": true
+    },
+    {
+      "name": "REQUEST JSONTOISO 500",
+      "output": "\n48=Failed",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOJSON 200",
+      "output": "\n{\"message\": \"Success\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOJSON 400",
+      "output": "\n{\"message\": \"Invalid\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOJSON 500",
+      "output": "\n{\"message\": \"Failed\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOXML 200",
+      "output": "\n<Result>\n  <message>Success</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOXML 400",
+      "output": "\n<Result>\n  <message>Invalid</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOXML 500",
+      "output": "\n<Result>\n  <message>Failed</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOISO 200",
+      "output": "\n48=Success",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOISO 400",
+      "output": "\n48=Invalid",
+      "passed": true
+    },
+    {
+      "name": "REQUEST XMLTOISO 500",
+      "output": "\n48=Failed",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOJSON 200",
+      "output": "\n{\"message\": \"Success\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOJSON 400",
+      "output": "\n{\"message\": \"Invalid\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOJSON 500",
+      "output": "\n{\"message\": \"Failed\"}",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOXML 200",
+      "output": "\n<Result>\n  <message>Success</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOXML 400",
+      "output": "\n<Result>\n  <message>Invalid</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOXML 500",
+      "output": "\n<Result>\n  <message>Failed</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOISO 200",
+      "output": "\n48=Success",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOISO 400",
+      "output": "\n48=Invalid",
+      "passed": true
+    },
+    {
+      "name": "REQUEST ISOTOISO 500",
+      "output": "\n48=Failed",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOJSON 200",
+      "output": "\n{\"message\": \"Success\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOJSON 400",
+      "output": "\n{\"message\": \"Invalid\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOJSON 500",
+      "output": "\n{\"message\": \"Failed\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOXML 200",
+      "output": "\n<Result>\n  <message>Success</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOXML 400",
+      "output": "\n<Result>\n  <message>Invalid</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOXML 500",
+      "output": "\n<Result>\n  <message>Failed</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOISO 200",
+      "output": "\n48=Success",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOISO 400",
+      "output": "\n48=Invalid",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE JSONTOISO 500",
+      "output": "\n48=Failed",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOJSON 200",
+      "output": "\n{\"message\": \"Success\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOJSON 400",
+      "output": "\n{\"message\": \"Invalid\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOJSON 500",
+      "output": "\n{\"message\": \"Failed\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOXML 200",
+      "output": "\n<Result>\n  <message>Success</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOXML 400",
+      "output": "\n<Result>\n  <message>Invalid</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOXML 500",
+      "output": "\n<Result>\n  <message>Failed</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOISO 200",
+      "output": "\n48=Success",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOISO 400",
+      "output": "\n48=Invalid",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE XMLTOISO 500",
+      "output": "\n48=Failed",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOJSON 200",
+      "output": "\n{\"message\": \"Success\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOJSON 400",
+      "output": "\n{\"message\": \"Invalid\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOJSON 500",
+      "output": "\n{\"message\": \"Failed\"}",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOXML 200",
+      "output": "\n<Result>\n  <message>Success</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOXML 400",
+      "output": "\n<Result>\n  <message>Invalid</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOXML 500",
+      "output": "\n<Result>\n  <message>Failed</message>\n</Result>\n",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOISO 200",
+      "output": "\n48=Success",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOISO 400",
+      "output": "\n48=Invalid",
+      "passed": true
+    },
+    {
+      "name": "RESPONSE ISOTOISO 500",
+      "output": "\n48=Failed",
+      "passed": true
+    }
+  ]
+}

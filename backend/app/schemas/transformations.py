@@ -106,6 +106,8 @@ class MappingDiscoveryRequest(RequestContext):
 
 class TransformationChatRequest(MappingDiscoveryRequest):
     message: str = ""
+    conditions: list[Dict[str, Any]] = Field(default_factory=list, max_length=20,
+        description='Business rules: target, ordered branches (field, operator, value, then), and else.')
     validations: list[Dict[str, Any]] = Field(default_factory=list)
     mappings: Dict[str, str] = Field(default_factory=dict,
         description='Optional target-to-source overrides. Omit or send an empty value for automatic mapping.')
